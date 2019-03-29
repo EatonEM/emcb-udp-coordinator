@@ -1,0 +1,48 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Node.js Program",
+            "program": "${file}",
+            "protocol": "inspector",
+            "outputCapture": "std",
+		},
+		{
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Example: discoverAndControl",
+            "program": "${workspaceFolder}/Examples/cli/discoverAndControl.js",
+            "protocol": "inspector",
+            "outputCapture": "std",
+		},
+		{
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Example: discoverAndInteractiveControl",
+            "program": "${workspaceFolder}/Examples/cli/discoverAndInteractiveControl.js",
+            "protocol": "inspector",
+            "outputCapture": "std",
+		},
+		{
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Example: discoverAndLogData",
+            "program": "${workspaceFolder}/Examples/cli/discoverAndLogData.js",
+            "protocol": "inspector",
+            "outputCapture": "std",
+		},
+		{
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Example: writeDeviceDataToCSV",
+            "program": "${workspaceFolder}/Examples/cli/writeDeviceDataToCSV.js",
+            "protocol": "inspector",
+            "outputCapture": "std",
+		},
+    ]
+}
