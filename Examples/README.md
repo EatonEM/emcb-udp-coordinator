@@ -30,7 +30,6 @@ for(var k in UDPKeys.unicast){
 
 module.exports = UDPKeys
 
-
 ### Command Line Interface Examples
 
 Examples in the [cli](./cli) folder, use a command line interface to interact with users and log/collect data.  These examples are described below:
