@@ -1,0 +1,45 @@
+{
+  "name": "emcb-udp-master",
+  "version": "0.8.0",
+  "description": "Module to discover, communicate, and and manage EMCBs using the local EMCB UDP API with both broadcast and unicast traffic.",
+  "keywords": [
+	  "EMCB",
+	  "Energy",
+	  "Management",
+	  "Circuit",
+	  "Breaker",
+	  "UDP",
+	  "Local",
+	  "API"
+  ],
+  "main": "index.js",
+  "files": [
+    "lib/"
+  ],
+  "dependencies": {
+    "bigint-buffer": "^1.1.2",
+    "chalk": "^2.4.2",
+    "color-name-list": "^3.76.0",
+    "int64-buffer": "^0.99.1007",
+    "ip": "^1.1.5",
+    "json2csv": "^4.4.1",
+    "microseconds": "^0.1.0",
+    "minimist": "^1.2.0",
+    "winston": "^3.2.1"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "mocha": "^6.0.2",
+    "sinon": "^7.2.7"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/EatonEM/emcb-udp-master"
+  },
+  "author": "EatonEM",
+  "license": "BSD-3-Clause"
+}
