@@ -3,7 +3,7 @@
 <!-- [![Build Status](https://secure.travis-ci.org/EatonEM/emcb-udp-master.svg?branch=master)](https://travis-ci.org/EatonEM/emcb-udp-master )-->
 [![Dependency Status](https://david-dm.org/EatonEM/emcb-udp-master.svg)](https://david-dm.org/EatonEM/emcb-udp-master)
 [![devDependency Status](https://david-dm.org/socketio/socket.io/dev-status.svg)](https://david-dm.org/EatonEM/emcb-udp-master#info=devDependencies)
-[![npm version](https://badge.fury.io/js/emcb-udp-master.svg)](https://badge.fury.io/js/emcb-udp-master.io)
+[![npm version](https://badge.fury.io/js/emcb-udp-master.svg)](https://badge.fury.io/js/emcb-udp-master)
 
 This node module allows you to experiment with the __EMCB UDP API__ to query and control Energy Management Circuit Breakers and provides an example implementation leveraging best practices.
 
@@ -27,10 +27,10 @@ This node module allows you to experiment with the __EMCB UDP API__ to query and
 
 Relevant Documentation can be found at:
 
-- [docs/API.md](./docs/API.md): Complete API documentation for this library
-- [docs/EMCB UDP API.pdf](./docs/EMCB\ UDP\ API.pdf): Complete API documentation for the EMCB UDP API protocol used on the local network that this library is implemented against.
+- [docs/API.md](docs/API.md): Complete API documentation for this library
+- [docs/EMCB UDP API.pdf](docs/EMCB UDP API.pdf): Complete API documentation for the EMCB UDP API protocol used on the local network that this library is implemented against.
 - [EMCB Cloud API](portal.developer.eatonem.com): Complete Cloud API documentation, including the steps required to setup UDP Keys on individual EMCBs which is needed to use this code!
-- [Examples/README.md](./Examples/README.md): Contains documentation on the provided examples and the necessary steps to begin leveraging them.
+- [Examples/README.md](Examples/README.md): Contains documentation on the provided examples and the necessary steps to begin leveraging them.
 
 ## Logging
 
