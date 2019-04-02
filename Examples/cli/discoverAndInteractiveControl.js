@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 const {
     EmcbUDPbroadcastMaster,
     logger,
@@ -49,30 +51,32 @@ var EMCBs = new EmcbUDPbroadcastMaster({
 })
 
 
-async function logFeedbackState(){
-    const feedbackStates = await EMCBs.getBreakerRemoteHandlePosition()
-
-    for(var ipAddress in feedbackStates.responses){
-        var device = feedbackStates.responses[ipAddress].device
-        console.log(chalk[device.chalkColor](device.idDevice + " Remote Handle Position is " + feedbackStates.responses[ipAddress].stateString))
-    }
-}
-
 function discoverDevices(){
     EMCBs.discoverDevices()
         .then((devices) => {
-            console.log("DISCOVER DEVICES COMPLETE - found " + Object.keys(devices).length + " EMCBs")
+			console.log("DISCOVER DEVICES COMPLETE - found " + Object.keys(devices).length + " EMCBs")
+
+			var expectedDevices = Object.keys(UDPKeys.unicast)
 
             var coloredDeviceArray = []
             const fields = ["ts", "breaker.state", "breaker.stateString", "meter.sequence", "meter.frequency", "meter.period", "meter.mJp0", "meter.mVARsp0", "meter.mVAsp0", "meter.LNmVp0", "meter.mAp0", "meter.q1mJp0", "meter.q2mJp0", "meter.q3mJp0", "meter.q4mJp0", "meter.q1mVARsp0", "meter.q2mVARsp0", "meter.q3mVARsp0", "meter.q4mVARsp0", "meter.q1mVAsp0", "meter.q2mVAsp0", "meter.q3mVAsp0", "meter.q4mVAsp0", "meter.mJp1", "meter.mVARsp1", "meter.mVAsp1", "meter.LNmVp1", "meter.mAp1", "meter.q1mJp1", "meter.q2mJp1", "meter.q3mJp1", "meter.q4mJp1", "meter.q1mVARsp1", "meter.q2mVARsp1", "meter.q3mVARsp1", "meter.q4mVARsp1", "meter.q1mVAsp1", "meter.q2mVAsp1", "meter.q3mVAsp1", "meter.q4mVAsp1", "meter.LLp01mV",];
             const transformOpts = { objectMode: true, highWaterMark: 16384, encoding: 'utf-8' };
 
             for(var ipAddress in devices){
-                coloredDeviceArray.push(chalk[devices[ipAddress].chalkColor](devices[ipAddress].idDevice));
+				coloredDeviceArray.push(chalk[devices[ipAddress].chalkColor](devices[ipAddress].idDevice));
 
-                // Blink the bargraph to the same color as what we are logging for 10 seconds!
+				var index = expectedDevices.indexOf(devices[ipAddress].idDevice);
+				if (index > -1) {
+					expectedDevices.splice(index, 1);
+				}
+
+                // Blink the bargraph to the same color as what we are loggiing for 10 seconds!
                 devices[ipAddress].setBargraphLEDToUserDefinedColorName(devices[ipAddress].chalkColor, 10, true)
             }
+
+			if(expectedDevices.length){
+				console.error(chalk.red("Did not find the following expected Devices: " + expectedDevices.join(",")))
+			}
 
             console.log(coloredDeviceArray.join(chalk.reset(",")))
 
@@ -111,11 +115,12 @@ function discoverDevices(){
                 errors.sort()
                 timeouts.sort()
 
-                var responseStr = responses.length > 0 ? chalk.reset("\nResponses:\n") + responses.join(chalk.reset(',\n')) : ""
-                var errorStr = errors.length > 0 ? chalk.reset("\nErrors:\n") + errors.join(chalk.reset(',\n')) : ""
-                var timeoutStr = timeouts.length > 0 ? chalk.reset("\nTimeouts:\n") + timeouts.join(chalk.reset(',\n')) : ""
+                var responseStr = responses.length > 0 ? chalk.reset(`\n${responses.length} Responses:\n`) + responses.join(chalk.reset(',\n')) : ""
+                var errorStr = errors.length > 0 ? chalk.reset(`\n${errors.length} Errors:\n`) + errors.join(chalk.reset(',\n')) : ""
+                var timeoutStr = timeouts.length > 0 ? chalk.reset(`${timeouts.length} \nTimeouts:\n`) + timeouts.join(chalk.reset(',\n')) : ""
 
-                logger(responseStr + errorStr + timeoutStr + '\n')
+				logger(responseStr + errorStr + timeoutStr + '\n')
+				// logger(util.inspect(data, false, 2))
             }
 
             function onError(err){
@@ -142,10 +147,10 @@ function discoverDevices(){
 
                     else if(key.name === 'd'){ // discover
                         function colorize(){
-                            // Blink the bargraph to the same color as what we are logging for 10 seconds!
+                            // Set the bargraph to the same color as what we are logging for 10 seconds!
                             for(var ipAddress in EMCBs.devices){
                                 var device = EMCBs.devices[ipAddress]
-                                device.setBargraphLEDToUserDefinedColorName(device.chalkColor, 10, true)
+                                device.setBargraphLEDToUserDefinedColorName(device.chalkColor, 10, false).catch(onError)
                             }
                         }
 
@@ -157,7 +162,7 @@ function discoverDevices(){
                             console.log("Discovered " + Object.keys(devices).length + " EMCBs - " + coloredDeviceArray.join(chalk.reset(",")))
                         })
                         .catch(onError).then(() => {
-                            return EMCBs.syncDeviceSequenceNumbers()
+                            return EMCBs.syncDeviceSequenceNumbers().catch(onError)
                         })
                         .then(colorize)
                         .catch(colorize)
@@ -179,7 +184,7 @@ function discoverDevices(){
 
                         console.log(chalk[device.chalkColor](`Identifying Device ${device.idDevice} using color ${device.chalkColor}`))
 
-                        device.setBargraphLEDToUserDefinedColorName(device.chalkColor, 10, false)
+                        device.setBargraphLEDToUserDefinedColorName(device.chalkColor, 10, false).catch(onError)
                         identifyIdx++
                     }
 
@@ -189,7 +194,7 @@ function discoverDevices(){
                         var color = rainbowColors[rainbowIdx]
                         color.blinking = false
 
-                        colorObj.fill(color, 0, 4)
+                        colorObj.fill(color, 1, 4)
 
                         console.log("Setting color to " + chalk.keyword(rainbowColorNames[rainbowIdx])(rainbowColorNames[rainbowIdx] == "white" ? "Normal Operation" : rainbowColorNames[rainbowIdx]))
                         EMCBs.setBargraphLEDToUserDefinedColor(rainbowIdx === rainbowColors.length-1 ? false : true, colorObj, 0).then(onSuccess).catch(onError)
@@ -203,8 +208,6 @@ function discoverDevices(){
 
                     else if(key.name === 'f') { // feedback state
                         EMCBs.getBreakerRemoteHandlePosition().then(onSuccess).catch(onError)
-
-                        logFeedbackState()
                     }
 
                     else if(key.name === 'm'){ // getMeterData
