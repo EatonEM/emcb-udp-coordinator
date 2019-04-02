@@ -2,7 +2,7 @@
 
 <!-- [![Build Status](https://secure.travis-ci.org/EatonEM/emcb-udp-master.svg?branch=master)](https://travis-ci.org/EatonEM/emcb-udp-master )-->
 [![Dependency Status](https://david-dm.org/EatonEM/emcb-udp-master.svg)](https://david-dm.org/EatonEM/emcb-udp-master)
-[![devDependency Status](https://david-dm.org/socketio/socket.io/dev-status.svg)](https://david-dm.org/EatonEM/emcb-udp-master#info=devDependencies)
+[![devDependency Status](https://david-dm.org/EatonEM/emcb-udp-master/dev-status.svg)](https://david-dm.org/EatonEM/emcb-udp-master#info=devDependencies)
 [![npm version](https://badge.fury.io/js/emcb-udp-master.svg)](https://badge.fury.io/js/emcb-udp-master)
 
 This node module allows you to experiment with the __EMCB UDP API__ to query and control Energy Management Circuit Breakers and provides an example implementation leveraging best practices.
