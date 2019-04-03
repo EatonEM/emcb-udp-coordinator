@@ -74,11 +74,12 @@ function discoverDevices(){
                 devices[ipAddress].setBargraphLEDToUserDefinedColorName(devices[ipAddress].chalkColor, 10, true)
             }
 
+			console.log(coloredDeviceArray.join(chalk.reset(", ")) + chalk.reset(""))
+
 			if(expectedDevices.length){
-				console.error(chalk.red("Did not find the following expected Devices: " + expectedDevices.join(",")))
+				console.error(chalk.red("Did not find the following expected Devices: " + expectedDevices.join(", ")))
 			}
 
-            console.log(coloredDeviceArray.join(chalk.reset(",")))
 
 
             function onSuccess(data, logger = console.log){
@@ -97,17 +98,18 @@ function discoverDevices(){
                     responses.push(chalk[device.chalkColor](util.inspect(data.responses[ipAddress])))
                 }
 
-                for(var ipAddress in data.timeouts){
+				for(var ipAddress in data.errors){
+					var errorString = data.errors[ipAddress].message
+					var device = data.errors[ipAddress].device
+					errors.push(chalk[device.chalkColor](device.idDevice + " - " + errorString))
+				}
+
+				for(var ipAddress in data.timeouts){
                     var errorString = data.timeouts[ipAddress].message
                     var device = data.timeouts[ipAddress].device
                     timeouts.push(chalk[device.chalkColor](device.idDevice + " - " + errorString))
                 }
 
-                for(var ipAddress in data.errors){
-                    var errorString = data.errors[ipAddress].message
-                    var device = data.errors[ipAddress].device
-                    errors.push(chalk[device.chalkColor](device.idDevice + " - " + errorString))
-                }
 
 
                 // Sort for consistent rainbow colors!
@@ -117,7 +119,7 @@ function discoverDevices(){
 
                 var responseStr = responses.length > 0 ? chalk.reset(`\n${responses.length} Responses:\n`) + responses.join(chalk.reset(',\n')) : ""
                 var errorStr = errors.length > 0 ? chalk.reset(`\n${errors.length} Errors:\n`) + errors.join(chalk.reset(',\n')) : ""
-                var timeoutStr = timeouts.length > 0 ? chalk.reset(`${timeouts.length} \nTimeouts:\n`) + timeouts.join(chalk.reset(',\n')) : ""
+                var timeoutStr = timeouts.length > 0 ? chalk.reset(`\n${timeouts.length} Timeouts:\n`) + timeouts.join(chalk.reset(',\n')) : ""
 
 				logger(responseStr + errorStr + timeoutStr + '\n')
 				// logger(util.inspect(data, false, 2))
@@ -159,7 +161,7 @@ function discoverDevices(){
                             for(var ipAddress in devices){
                                 coloredDeviceArray.push(chalk[devices[ipAddress].chalkColor](devices[ipAddress].idDevice));
                             }
-                            console.log("Discovered " + Object.keys(devices).length + " EMCBs - " + coloredDeviceArray.join(chalk.reset(",")))
+                            console.log("Discovered " + Object.keys(devices).length + " EMCBs - " + coloredDeviceArray.join(chalk.reset(", ")) + chalk.reset(""))
                         })
                         .catch(onError).then(() => {
                             return EMCBs.syncDeviceSequenceNumbers().catch(onError)
