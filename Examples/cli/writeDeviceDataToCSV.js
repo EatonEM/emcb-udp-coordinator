@@ -3,9 +3,6 @@ const {
     EmcbUDPbroadcastMaster,
     logger,
 
-    // Network Configuration
-    EMCB_UDP_BROADCAST_ADDRESS,
-
     // GET Message Codes
     EMCB_UDP_MESSAGE_CODE_GET_NEXT_SEQUENCE_NUMBER,
     EMCB_UDP_MESSAGE_CODE_GET_DEVICE_DEBUG_DATA,
@@ -48,8 +45,6 @@ var jsonWriteStreams = {}
 var totalQueueDrains = 0
 var successes = 0
 var failures = 0
-
-logger.info("Broadcast Address == " + EMCB_UDP_BROADCAST_ADDRESS)
 
 var EMCBs = new EmcbUDPbroadcastMaster({
     broadcastUDPKey : UDPKeys.broadcast,

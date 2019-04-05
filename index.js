@@ -1,8 +1,6 @@
 'use strict';
 
 const {
-    // Network Configuration
-    EMCB_UDP_BROADCAST_ADDRESS,
     EMCB_UDP_PORT,
 
     // Application Layer Constraints
@@ -58,7 +56,6 @@ const {
 module.exports.EmcbUDPbroadcastMaster = require('./lib/emcbUDPbroadcastMaster.js');
 module.exports.logger                 = require('./lib/logger.js');
 
-module.exports.EMCB_UDP_BROADCAST_ADDRESS = EMCB_UDP_BROADCAST_ADDRESS
 module.exports.EMCB_UDP_PORT              = EMCB_UDP_PORT
 
 module.exports.EMCB_UDP_IMPLEMENTED_PROTOCOL_VERSION        = EMCB_UDP_IMPLEMENTED_PROTOCOL_VERSION

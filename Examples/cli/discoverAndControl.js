@@ -2,7 +2,6 @@ const {
     EmcbUDPbroadcastMaster,
     logger,
 
-    EMCB_UDP_BROADCAST_ADDRESS,
     EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN,
     EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED,
     EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE
@@ -34,7 +33,6 @@ switch(command){
         break;
 }
 
-logger.info("Broadcast Address == " + EMCB_UDP_BROADCAST_ADDRESS)
 
 var EMCBs = new EmcbUDPbroadcastMaster({
     broadcastUDPKey : UDPKeys.broadcast,
