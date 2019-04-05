@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [0.9.0] - 2019-04-05
+
 ### Removed
 
 - EMCB_UDP_BROADCAST_ADDRESS is no longer a constant as we are now using some async code to determine the broadcast address.  This value can still be accessed through the `EmcbUDPbroadcastMaster.ipAddress` property (although it may not be available immediately in sync code after instantiation).
@@ -36,5 +38,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Initial Public Release!
 
 <!-- Make all of our releases live links -->
+[0.9.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.9.0
 [0.8.1]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.8.1
 [0.8.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.8.0
