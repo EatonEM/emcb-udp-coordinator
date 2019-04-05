@@ -3,14 +3,14 @@
   "version": "0.8.1",
   "description": "Module to discover, communicate, and and manage EMCBs using the local EMCB UDP API with both broadcast and unicast traffic.",
   "keywords": [
-	  "EMCB",
-	  "Energy",
-	  "Management",
-	  "Circuit",
-	  "Breaker",
-	  "UDP",
-	  "Local",
-	  "API"
+    "EMCB",
+    "Energy",
+    "Management",
+    "Circuit",
+    "Breaker",
+    "UDP",
+    "Local",
+    "API"
   ],
   "main": "index.js",
   "files": [
@@ -22,12 +22,14 @@
     "color-name-list": "^3.76.0",
     "int64-buffer": "^0.99.1007",
     "ip": "^1.1.5",
-    "json2csv": "^4.4.1",
+    "local-ipv4-address": "0.0.2",
     "microseconds": "^0.1.0",
-    "minimist": "^1.2.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
+    "socket.io": "^2.2.0",
+    "minimist": "^1.2.0",
+    "json2csv": "^4.4.1",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "mocha": "^6.0.2",
