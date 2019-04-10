@@ -80,7 +80,8 @@ localDevices.on(EMCB_UDP_EVENT_DEVICE_IP_ADDRESS_CHANGED, data => {
 // Called whenever there is a device timeout
 localDevices.on(EMCB_UDP_ERROR_TIMEOUT, data => {
     failures++
-    logger.warn(chalk[data.device.chalkColor](data.message))
+	var color = data.device ? data.device.chalkColor : "reset"
+    logger.warn(chalk[color](data.message))
 })
 
 // Called whenever there is a parser error - which can include a nack from the device, invalid number of bytes, etc.

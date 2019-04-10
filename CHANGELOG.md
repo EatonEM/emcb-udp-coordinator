@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### On Deck Features
+
+- unicast only mode
+
+### Added
+
+- To be documented EmcbUDPbroadcastMaster functionality
+  - `getMasterIPAddress()`
+  - `createDevice(idDevice, ipAddress, unicastGetNextSequenceNumber = true)`
+- Undocumented EmcbUDPbroadcastMaster functionality:
+  - `setCloudLogging` and `EMCB_UDP_MESSAGE_CODE_SET_CLOUD_LOGGING` constant
+  - `setMeterMode` and `EMCB_UDP_MESSAGE_CODE_SET_METER_MODE` constant
+
+### Fixed
+
+- Issue with using an undefined device in `.on(EMCB_UDP_ERROR_TIMEOUT, ...)` in examples
+
 ## [0.9.0] - 2019-04-05
 
 ### Removed
