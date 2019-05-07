@@ -270,7 +270,7 @@ Gets the Current Metering Data for the EMCB.
         - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
         - `updateNum` _(Number)_: Integer Update number. Starts at 0 on boot and increments when periodic data is updated on the device.
         - `frequency` _(Number)_: Integer Line frequency. mHz.
-        - `period` _(Number)_: Integer Period. The Number of seconds over which the returned was accumulated.  // was a UInt8 in protocol version 1.07
+        - `period` _(Number)_: Integer Period. The Number of milliseconds over which the returned data was accumulated.
         - `mJp0` _(Number)_: Int64 Phase 0 Cumulative active energy. milliJoules = milliWatt-Second.
         - `mVARsp0` _(Number)_: Int64 Phase 0 Cumulative reactive energy. mVARs.
         - `mVAsp0` _(Number)_: UInt64 Phase 0 Cumulative apparent energy. mVAs.

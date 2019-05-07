@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Average Power Logging to `Examples/cli/writeDeviceDataToCSV.js`
 - To be documented EmcbUDPbroadcastMaster functionality
   - `getMasterIPAddress()`
   - `createDevice(idDevice, ipAddress, unicastGetNextSequenceNumber = true)`
@@ -21,7 +22,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
+- Parsing issues for Int64 numbers (was only parsing 7 bytes instead of all 8 due to the fact that `Buffer.slice(start,end)` is not inclusive on the `end`)
 - Issue with using an undefined device in `.on(EMCB_UDP_ERROR_TIMEOUT, ...)` in examples
+- Documentation error in `getMeterData` `data.responses[${IP_ADDRESS}].period`
+- Formatting issues in `Examples/cli/writeDeviceDataToCSV.js`
+- Improved initialization code to handle devices discovered with a good Broadcast key but without a provided unicast key
 
 ## [0.9.0] - 2019-04-05
 
