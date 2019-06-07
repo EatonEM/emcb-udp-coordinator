@@ -79,21 +79,21 @@ EMCBs.on(EMCB_UDP_MESSAGE_CODE_GET_METER_TELEMETRY_DATA, function(data){
 		var diff = data.updateNum - g_PreviousMeterData[idDevice].updateNum
 		if(diff < 0) diff += 256	// Sequence Space arithmetic
 
-		if(diff > 5){ // Don't overwhelm the logging
+		if(diff >= 5){ // Don't overwhelm the logging
 			// Calculate the amount of delta Energy in milliJoules = milliWatt-Seconds.  We will divide this by the number of milliseconds since our last update below, to come up with the average Power that the device has consumed since our last log
-			var deltarRealEp0 = data.mJp0 - g_PreviousMeterData[idDevice].mJp0
+			var deltaRealEp0 = data.mJp0 - g_PreviousMeterData[idDevice].mJp0
 			var deltaRealEp1 = data.mJp1 - g_PreviousMeterData[idDevice].mJp1
 
-			// Vertical loggiong
+			// Vertical logging
 			// logger.info(chalk[data.device.chalkColor](`[${data.device.idDevice}]
             // updateNum: ${data.updateNum.toString().padStart(3)},  Period: ${data.period.toString().padStart(4)},
             // LN-Volts-p0: ${numeral(data.LNmVp0/1000.0).format('0.000').padStart(7)}, LN-Volts-p1: ${numeral(data.LNmVp1/1000.0).format('0.000').padStart(7)},
             // Amps-p0: ${numeral(data.mAp0/1000.0).format('0.000').padStart(7)},     Amps-p1: ${numeral(data.mAp1/1000.0).format('0.000').padStart(7)},
-            // Watts-p0: ${numeral(deltarRealEp0/(data.period*diff)).format('0.000').padStart(9)},  Watts-p1: ${numeral(deltaRealEp1/(data.period*diff)).format('0.000').padStart(9)},
+            // Watts-p0: ${numeral(deltaRealEp0/(data.period*diff)).format('0.000').padStart(9)},  Watts-p1: ${numeral(deltaRealEp1/(data.period*diff)).format('0.000').padStart(9)},
 			// Frequency-Hz: ${numeral(data.frequency/1000.0).format('0.000')}`))
 
 			// Widescreen logging
-			logger.info(chalk[data.device.chalkColor](`[${data.device.idDevice}] updateNum: ${data.updateNum.toString().padStart(3)},  Period: ${data.period.toString().padStart(4)}, LN-Volts-p0: ${numeral(data.LNmVp0/1000.0).format('0.000').padStart(7)}, LN-Volts-p1: ${numeral(data.LNmVp1/1000.0).format('0.000').padStart(7)},Amps-p0: ${numeral(data.mAp0/1000.0).format('0.000').padStart(7)}, Amps-p1: ${numeral(data.mAp1/1000.0).format('0.000').padStart(7)}, Watts-p0: ${numeral(deltarRealEp0/(data.period*diff)).format('0.000').padStart(9)}, Watts-p1: ${numeral(deltaRealEp1/(data.period*diff)).format('0.000').padStart(9)}, Frequency-Hz: ${numeral(data.frequency/1000.0).format('0.000')}`))
+			logger.info(chalk[data.device.chalkColor](`[${data.device.idDevice}] updateNum: ${data.updateNum.toString().padStart(3)},  Period: ${data.period.toString().padStart(4)}, LN-Volts-p0: ${numeral(data.LNmVp0/1000.0).format('0.000').padStart(7)}, LN-Volts-p1: ${numeral(data.LNmVp1/1000.0).format('0.000').padStart(7)},Amps-p0: ${numeral(data.mAp0/1000.0).format('0.000').padStart(7)}, Amps-p1: ${numeral(data.mAp1/1000.0).format('0.000').padStart(7)}, Watts-p0: ${numeral(-deltaRealEp0/(data.period*diff)).format('0.000').padStart(9)}, Watts-p1: ${numeral(deltaRealEp1/(data.period*diff)).format('0.000').padStart(9)}, Frequency-Hz: ${numeral(data.frequency/1000.0).format('0.000')}`))
 
 		} else{
 			// If we don't log, we don't want to clobber our data otherwise we will never get to a diff > 5!
