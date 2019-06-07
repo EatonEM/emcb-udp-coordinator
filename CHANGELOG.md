@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### On Deck Features
 
 - unicast only mode
+- per message timeouts working in concert with "throttling"
 
 ### Added
 
@@ -20,9 +21,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - `setCloudLogging` and `EMCB_UDP_MESSAGE_CODE_SET_CLOUD_LOGGING` constant
   - `setMeterMode` and `EMCB_UDP_MESSAGE_CODE_SET_METER_MODE` constant
 
+### Changed
+
+- Allow `.send()` to be called by outside code with a generic `messageCode` and `messageData`, passing the response back as a raw buffer
+
 ### Fixed
 
 - Parsing issues for Int64 numbers (was only parsing 7 bytes instead of all 8 due to the fact that `Buffer.slice(start,end)` is not inclusive on the `end`)
+- The `device` property was not present in **EMCB_UDP_EVENT_DEVICE_REMOVED** events
 - Issue with using an undefined device in `.on(EMCB_UDP_ERROR_TIMEOUT, ...)` in examples
 - Documentation error in `getMeterData` `data.responses[${IP_ADDRESS}].period`
 - Formatting issues in `Examples/cli/writeDeviceDataToCSV.js`

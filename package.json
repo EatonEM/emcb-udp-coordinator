@@ -23,6 +23,7 @@
     "int64-buffer": "^0.99.1007",
     "ip": "^1.1.5",
     "local-ipv4-address": "0.0.2",
+    "lodash.clonedeep": "^4.5.0",
     "microseconds": "^0.1.0",
     "numeral": "^2.0.6",
     "winston": "^3.2.1"
