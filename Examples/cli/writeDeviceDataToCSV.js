@@ -3,9 +3,6 @@ const {
     EmcbUDPbroadcastMaster,
     logger,
 
-    // Network Configuration
-    EMCB_UDP_BROADCAST_ADDRESS,
-
     // GET Message Codes
     EMCB_UDP_MESSAGE_CODE_GET_NEXT_SEQUENCE_NUMBER,
     EMCB_UDP_MESSAGE_CODE_GET_DEVICE_DEBUG_DATA,
@@ -41,15 +38,13 @@ const path                   = require('path')
 const { Readable }           = require('stream')
 const Json2csvTransform      = require('json2csv').Transform;
 const chalk                  = require('chalk');
-
+const numeral 				 = require('numeral');
 
 var jsonWriteStreams = {}
 
 var totalQueueDrains = 0
 var successes = 0
 var failures = 0
-
-logger.info("Broadcast Address == " + EMCB_UDP_BROADCAST_ADDRESS)
 
 var EMCBs = new EmcbUDPbroadcastMaster({
     broadcastUDPKey : UDPKeys.broadcast,
@@ -63,11 +58,11 @@ EMCBs.on(EMCB_UDP_MESSAGE_CODE_GET_NEXT_SEQUENCE_NUMBER, data => {
 
 // Called whenever there is a response to a GET_DEVICE_STATUS command that contains fresh data
 EMCBs.on(EMCB_UDP_MESSAGE_CODE_GET_DEVICE_STATUS, data => {
-    logger.info(chalk[data.device.chalkColor](`Received GET_DEVICE_STATUS response from ${data.device.ipAddress} with Device ID ${data.device.idDevice}`))
+    logger.debug(chalk[data.device.chalkColor](`Received GET_DEVICE_STATUS response from ${data.device.ipAddress} with Device ID ${data.device.idDevice}`))
 })
 
 EMCBs.on(EMCB_UDP_MESSAGE_CODE_GET_DEVICE_DEBUG_DATA, data => {
-    logger.info(chalk[data.device.chalkColor](`Received GET_DEVICE_DEBUG_DATA response from ${data.device.ipAddress} with Device ID ${data.device.idDevice}`))
+    logger.debug(chalk[data.device.chalkColor](`Received GET_DEVICE_DEBUG_DATA response from ${data.device.ipAddress} with Device ID ${data.device.idDevice}`))
 })
 
 // Called whenever the breaker feedback position changes - could be from a GET_BREAKER_REMOTE_HANDLE_POSITION, GET_DEVICE_STATUS, or SET_BREAKER_REMOTE_HANDLE_POSITION command)
@@ -76,16 +71,38 @@ EMCBs.on(EMCB_UDP_MESSAGE_CODE_GET_BREAKER_REMOTE_HANDLE_POSITION, function(data
 })
 
 // Called whenever there is new EMCB Meter data (as detected by seeing an update to updateNum) - could be GET_DEVICE_STATUS or GET_METER_TELEMETRY_DATA
+var g_PreviousMeterData = {}
 EMCBs.on(EMCB_UDP_MESSAGE_CODE_GET_METER_TELEMETRY_DATA, function(data){
-    if(data.updateNum%5 === 0){
-        logger.info(chalk[data.device.chalkColor](`${data.device.idDevice}: updateNum=${data.updateNum.toString().padStart(3)}, LN-Volts-p0=${(data.LNmVp0/1000.0).toString().padEnd(7, "0")}, LN-Volts-p1=${(data.LNmVp1/1000.0).toString().padEnd(7, "0")}, Amps-p0=${(data.mAp0/1000.0).toString().padStart(7)}, Amps-p1=${(data.mAp1/1000.0).toString().padStart(7)}, Frequency-Hz=${(data.frequency/1000.0).toString().padEnd(6, "0")}`))
-    }
-})
+	var idDevice = data.device.idDevice
 
-// Listening to an individual device instead of ALL devices works just fine too :)
-// EMCBs.getDevice("10.130.116.50").on(EMCB_UDP_MESSAGE_CODE_GET_METER_TELEMETRY_DATA, function(meterData){
-//     console.log(meterData)
-// })
+    if(g_PreviousMeterData[idDevice]){
+		var diff = data.updateNum - g_PreviousMeterData[idDevice].updateNum
+		if(diff < 0) diff += 256	// Sequence Space arithmetic
+
+		if(diff >= 5){ // Don't overwhelm the logging
+			// Calculate the amount of delta Energy in milliJoules = milliWatt-Seconds.  We will divide this by the number of milliseconds since our last update below, to come up with the average Power that the device has consumed since our last log
+			var deltaRealEp0 = data.mJp0 - g_PreviousMeterData[idDevice].mJp0
+			var deltaRealEp1 = data.mJp1 - g_PreviousMeterData[idDevice].mJp1
+
+			// Vertical logging
+			// logger.info(chalk[data.device.chalkColor](`[${data.device.idDevice}]
+            // updateNum: ${data.updateNum.toString().padStart(3)},  Period: ${data.period.toString().padStart(4)},
+            // LN-Volts-p0: ${numeral(data.LNmVp0/1000.0).format('0.000').padStart(7)}, LN-Volts-p1: ${numeral(data.LNmVp1/1000.0).format('0.000').padStart(7)},
+            // Amps-p0: ${numeral(data.mAp0/1000.0).format('0.000').padStart(7)},     Amps-p1: ${numeral(data.mAp1/1000.0).format('0.000').padStart(7)},
+            // Watts-p0: ${numeral(deltaRealEp0/(data.period*diff)).format('0.000').padStart(9)},  Watts-p1: ${numeral(deltaRealEp1/(data.period*diff)).format('0.000').padStart(9)},
+			// Frequency-Hz: ${numeral(data.frequency/1000.0).format('0.000')}`))
+
+			// Widescreen logging
+			logger.info(chalk[data.device.chalkColor](`[${data.device.idDevice}] updateNum: ${data.updateNum.toString().padStart(3)},  Period: ${data.period.toString().padStart(4)}, LN-Volts-p0: ${numeral(data.LNmVp0/1000.0).format('0.000').padStart(7)}, LN-Volts-p1: ${numeral(data.LNmVp1/1000.0).format('0.000').padStart(7)},Amps-p0: ${numeral(data.mAp0/1000.0).format('0.000').padStart(7)}, Amps-p1: ${numeral(data.mAp1/1000.0).format('0.000').padStart(7)}, Watts-p0: ${numeral(-deltaRealEp0/(data.period*diff)).format('0.000').padStart(9)}, Watts-p1: ${numeral(deltaRealEp1/(data.period*diff)).format('0.000').padStart(9)}, Frequency-Hz: ${numeral(data.frequency/1000.0).format('0.000')}`))
+
+		} else{
+			// If we don't log, we don't want to clobber our data otherwise we will never get to a diff > 5!
+			return
+		}
+	}
+
+	g_PreviousMeterData[idDevice] = data;
+})
 
 // Called for every successful SET_NEXT_SEQUENCE_NUMBER command
 EMCBs.on(EMCB_UDP_MESSAGE_CODE_SET_NEXT_SEQUENCE_NUMBER, data => {
@@ -119,8 +136,9 @@ EMCBs.on(EMCB_UDP_EVENT_DEVICE_IP_ADDRESS_CHANGED, data => {
 
 // Called whenever there is a device timeout
 EMCBs.on(EMCB_UDP_ERROR_TIMEOUT, data => {
-    failures++
-    logger.warn(chalk[data.device.chalkColor](data.message))
+	failures++
+	var color = data.device ? data.device.chalkColor : "reset"
+    logger.debug(chalk[color](data.message))
 })
 
 // Called whenever there is a parser error - which can include a nack from the device, invalid number of bytes, etc.

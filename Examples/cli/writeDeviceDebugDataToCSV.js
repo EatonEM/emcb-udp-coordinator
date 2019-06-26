@@ -3,9 +3,6 @@ const {
     EmcbUDPbroadcastMaster,
     logger,
 
-    // Network Configuration
-    EMCB_UDP_BROADCAST_ADDRESS,
-
     // GET Message Codes
     EMCB_UDP_MESSAGE_CODE_GET_NEXT_SEQUENCE_NUMBER,
     EMCB_UDP_MESSAGE_CODE_GET_DEVICE_DEBUG_DATA,
@@ -41,8 +38,6 @@ var jsonWriteStreams = {}
 var totalQueueDrains = 0
 var successes = 0
 var failures = 0
-
-logger.info("Broadcast Address == " + EMCB_UDP_BROADCAST_ADDRESS)
 
 var localDevices = new EmcbUDPbroadcastMaster({
     broadcastUDPKey : UDPKeys.broadcast,
@@ -85,7 +80,8 @@ localDevices.on(EMCB_UDP_EVENT_DEVICE_IP_ADDRESS_CHANGED, data => {
 // Called whenever there is a device timeout
 localDevices.on(EMCB_UDP_ERROR_TIMEOUT, data => {
     failures++
-    logger.warn(chalk[data.device.chalkColor](data.message))
+	var color = data.device ? data.device.chalkColor : "reset"
+    logger.warn(chalk[color](data.message))
 })
 
 // Called whenever there is a parser error - which can include a nack from the device, invalid number of bytes, etc.

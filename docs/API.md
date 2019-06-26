@@ -5,8 +5,10 @@
   - [new EmcbUDPbroadcastMaster(args)](#new-emcbudpbroadcastmasterargs)
   - [updateBroadcastUDPkey(key)](#updatebroadcastudpkeykey)
   - [updateUnicastUDPkey(key)](#updateunicastudpkeyiddevice-key)
+  - [getMasterIPAddress()](#getMasterIPAddress)
   - [getDevice(ipAddressOrIdDevice)](#getDeviceipaddressoriddevice)
   - [discoverDevices([nonce])](#discoverdevicesnonce)
+  - [createDevice(idDevice, ipAddress, [unicastGetNextSequenceNumber])](#createDeviceidDevice-ipAddress-unicastGetNextSequenceNumber)
   - [syncDeviceSequenceNumbers()](#syncdevicesequencenumbers)
   - [getNextSequenceNumber([nonce])](#getnextsequencenumbernonce)
   - [getBreakerRemoteHandlePosition()](#getbreakerremotehandleposition)
@@ -22,7 +24,6 @@
 - [Class: logger](#logger)
 - [Constants](#constants)
   - [Network Configuration](#network-configuration)
-    - [EMCB_UDP_BROADCAST_ADDRESS](#EMCB_UDP_BROADCAST_ADDRESS)
     - [EMCB_UDP_PORT](#EMCB_UDP_PORT)
   - [EMCB UDP Application Layer](#emcb-udp-application-layer)
     - [EMCB_UDP_IMPLEMENTED_PROTOCOL_VERSION](#EMCB_UDP_IMPLEMENTED_PROTOCOL_VERSION)
@@ -78,7 +79,7 @@ const master0 = require('emcbUDPmaster').EmcbUDPbroadcastMaster
 
 In addition to the functions described below, an [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) instance has the following properties available to access:
 
-- `ipAddress` _(String)_: The local network broadcast IP Address used by the instance.
+- `ipAddress` _(String)_: The local network broadcast IP Address used by the instance.  This will be set asyncronously if no `broadcastIPAddress` is provided to the constructor
 - `port` _(Number)_: The Destination UDP port number used by the instance and all [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) instances.
 - `devices` _(Object)_: An object indexed by individual EMCB device `IP Addresses`, which holds all [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) instances for the discovered devices.
 - `udpSocket` _(dgram.Socket)_: The [Node.js udp4 Socket](https://nodejs.org/api/dgram.html#dgram_class_dgram_socket) used for all local communication on the network.
@@ -92,6 +93,8 @@ Creates an instance of the Broadcast Master object.
   - `broadcastUDPKey` _(Buffer)_: UDP Key for signing/validating all broadcast messages
   - `unicastUDPKeys` _(Object)_: `[Key]: Value` pairs for unicast UDP Keys for signing/validating messages
     - _`$DEVICE_ID`_ _(Buffer)_:  UDP Key for signing/validating all unicast messages for the particular device ID.
+  - [`broadcastIPAddress`] _(String)_: Optional broadcast IP address for the master to use.
+  - [`ifaceName`] _(String)_: Optional interface name (i.e. in the keys provided by [`os.networkInterfaces()`](https://nodejs.org/api/os.html#os_os_networkinterfaces)) to use as the network interface for UDP traffic.  This will only be used if `broadcastIPAddress` is not provided.  If this key is __also__ not provided, the instance will try to determine the "default" network interface via [`local-ipv4-address`](https://www.npmjs.com/package/local-ipv4-address) (with the caveats described at the link)
   - [`port`] _(String)_: Optional destination UDP port number to use for all communication.  Defaults to [EMCB_UDP_PORT](#EMCB_UDP_PORT).
   - [`sequenceNumber`] _(Number)_: Optional "Next" Sequence Number that we will use when interacting with this device.  Defaults to a random number within the legal UInt32 range of 0 <= x <= 0xFFFFFFFF.  **This value should be left undefined or retreived from non-volatile memory and set to the last highest sequence number used to maintain cybersecurity.**
 - **RETURNS** `instance` _(EmcbUDPbroadcastMaster)_: an instantiated [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster).
@@ -130,6 +133,18 @@ Updates the unicast UDP Key for a particular device provisioned via the [EMCB Cl
 
 ```javascript
 EMCBs.updateUnicastUDPkey("30000c2a690c7652", Buffer.from("DD4253D8725A02A0C1FA3417D809686FE397CC8148EFF5328CE436644849A225", "hex")
+```
+
+### getMasterIPAddress()
+
+Get the [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster)'s `ipAddress`.
+
+- **RETURNS** `Promise` _(Object)_: A `promise` that resolves with the following data or throws an [`Error`](https://nodejs.org/api/errors.html):
+  - `ipAddress` _(String)_: The IP Address of the Master's interface that is being used by the library.
+
+```javascript
+console.log(EMCBs.getDevice("30000c2a690c7652").idDevice)
+// 30000c2a690c7652
 ```
 
 ### getDevice(ipAddressOrIdDevice)
@@ -175,6 +190,15 @@ EMCBs.discoverDevices()
 // 3000d8c46a572cf2,3000d8c46a572d8a,3000d8c46a572d5c,3000d8c46a572af0,3000d8c46a572c34,3000d8c46a572b08,3000d8c46a572aba,3000d8c46a572b34
 // **NOTE** this (and all logs from each specific device) will be colorized in terminals that support ANSI escape codes!
 ```
+
+## createDevice(idDevice, ipAddress, [unicastGetNextSequenceNumber])]
+
+Creates an [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for a given `idDevice` at a given `ipAddress` (assuming its UDP Key is provided to [new EmcbUDPbroadcastMaster(args)](#new-emcbudpbroadcastmasterargs)).
+
+- `idDevice` _(String)_:  Device ID.
+- `ipAddress` _(String)_: The local network IP Address of the device.
+- [`unicastGetNextSequenceNumber`] _(Boolean)_: Optional `true`/`false` to determine if the device's sequence number should be obtained via a unicast message.  Defaults to true.
+- **RETURNS** - `device` _(EmcbUDPdeviceMaster)_: The newly created [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) instance.
 
 ### syncDeviceSequenceNumbers()
 
@@ -269,7 +293,7 @@ Gets the Current Metering Data for the EMCB.
         - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
         - `updateNum` _(Number)_: Integer Update number. Starts at 0 on boot and increments when periodic data is updated on the device.
         - `frequency` _(Number)_: Integer Line frequency. mHz.
-        - `period` _(Number)_: Integer Period. The Number of seconds over which the returned was accumulated.  // was a UInt8 in protocol version 1.07
+        - `period` _(Number)_: Integer Period. The Number of milliseconds over which the returned data was accumulated.
         - `mJp0` _(Number)_: Int64 Phase 0 Cumulative active energy. milliJoules = milliWatt-Second.
         - `mVARsp0` _(Number)_: Int64 Phase 0 Cumulative reactive energy. mVARs.
         - `mVAsp0` _(Number)_: UInt64 Phase 0 Cumulative apparent energy. mVAs.
@@ -601,7 +625,7 @@ for(var ipAddress in EMCBs.devices){
 
 ## EmcbUDPdeviceMaster
 
-The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) exposes the same functionality as the [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster), but unicasts each command to a specific device/IP address rather than using the [EMCB_UDP_BROADCAST_ADDRESS](#EMCB_UDP_BROADCAST_ADDRESS).  In addition to the commands listed below, [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) also extends the [EventEmitter](https://nodejs.org/api/events.html) class and makes the events described in [EventEmitter Cheat Sheet](#eventemitter-cheat-sheet) available to `.on()`, `.once()`, etc.
+The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) exposes the same functionality as the [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster), but unicasts each command to a specific device/IP address rather than using the broadcast IP address.  In addition to the commands listed below, [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) also extends the [EventEmitter](https://nodejs.org/api/events.html) class and makes the events described in [EventEmitter Cheat Sheet](#eventemitter-cheat-sheet) available to `.on()`, `.once()`, etc.
 
 Instances of this class are created and managed by the [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) (rather than being created directly) as a part of the [Device Discovery](#discoverdevicesnonce) process (and more accurately during [getNextSequenceNumber](#getnextsequencenumbernonce) responses).  The instances can be obtained using the [getDevice](#getDeviceipaddressoriddevice) function or by accessing the [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster).`devices` property directly by the device's `IP Address`.
 
@@ -609,6 +633,7 @@ The following commands from the [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmast
 
 - [updateBroadcastUDPkey(key)](#updatebroadcastudpkeykey)
 - [updateUnicastUDPkey(key)](#updateunicastudpkeyiddevice-key)
+- [getMasterIPAddress()](#getMasterIPAddress)
 - [getDevice(ipAddressOrIdDevice)](#getDeviceipaddressoriddevice)
 - [discoverDevices(nonce)](#discoverdevicesnonce)
 - [syncDeviceSequenceNumbers](#syncdevicesequencenumbers)
@@ -739,7 +764,6 @@ The following constants are exported by the module and available for application
 const {
 
     // Network Configuration
-    EMCB_UDP_BROADCAST_ADDRESS,
     EMCB_UDP_PORT,
 
     // Application Layer Constraints
@@ -796,10 +820,6 @@ const {
 ```
 
 ### Network Configuration
-
-#### EMCB_UDP_BROADCAST_ADDRESS
-
-The broadcast IP address on the local network that will be used by [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster).
 
 #### EMCB_UDP_PORT
 

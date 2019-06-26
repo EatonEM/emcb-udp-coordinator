@@ -1,14 +1,10 @@
 const {
     EmcbUDPbroadcastMaster,
     logger,
-
-    EMCB_UDP_BROADCAST_ADDRESS,
 } = require('./../../'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-master` module, replace with `require("emcb-udp-master")`
 
 const UDPKeys                = require("../_config.js")
 const chalk                  = require('chalk');
-
-logger.info("Broadcast Address == " + EMCB_UDP_BROADCAST_ADDRESS)
 
 var EMCBs = new EmcbUDPbroadcastMaster({
     broadcastUDPKey : UDPKeys.broadcast,
