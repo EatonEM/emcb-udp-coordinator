@@ -9,21 +9,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### On Deck Features
 
 - unicast only mode
-- per message timeouts working in concert with "throttling"
+- per message timeouts (that can be longer than our throttle time) / greedy sending working in concert with "throttling"
+
+## [0.10.0] - 2019-06-26
 
 ### Added
 
-- Average Power Logging to `Examples/cli/writeDeviceDataToCSV.js`
-- To be documented EmcbUDPbroadcastMaster functionality
-  - `getMasterIPAddress()`
-  - `createDevice(idDevice, ipAddress, unicastGetNextSequenceNumber = true)`
+- Average Power Calculation / Logging (in Watts) to `Examples/cli/writeDeviceDataToCSV.js`
+- `getMasterIPAddress()`
+- `createDevice(idDevice, ipAddress, unicastGetNextSequenceNumber = true)`
 - Undocumented EmcbUDPbroadcastMaster functionality:
   - `setCloudLogging` and `EMCB_UDP_MESSAGE_CODE_SET_CLOUD_LOGGING` constant
   - `setMeterMode` and `EMCB_UDP_MESSAGE_CODE_SET_METER_MODE` constant
 
 ### Changed
 
-- Allow `.send()` to be called by outside code with a generic `messageCode` and `messageData`, passing the response back as a raw buffer
+- Allow `.send()` to be called by outside code with a generic `messageCode` and `messageData`, passing the response back as a raw buffer.  This allows sending of arbitrary data to a device, without needing to implement a parser, etc. held by the library.  Currently this is Undocumented behavior.
 
 ### Fixed
 

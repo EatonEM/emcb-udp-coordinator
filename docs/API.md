@@ -5,8 +5,10 @@
   - [new EmcbUDPbroadcastMaster(args)](#new-emcbudpbroadcastmasterargs)
   - [updateBroadcastUDPkey(key)](#updatebroadcastudpkeykey)
   - [updateUnicastUDPkey(key)](#updateunicastudpkeyiddevice-key)
+  - [getMasterIPAddress()](#getMasterIPAddress)
   - [getDevice(ipAddressOrIdDevice)](#getDeviceipaddressoriddevice)
   - [discoverDevices([nonce])](#discoverdevicesnonce)
+  - [createDevice(idDevice, ipAddress, [unicastGetNextSequenceNumber])](#createDeviceidDevice-ipAddress-unicastGetNextSequenceNumber)
   - [syncDeviceSequenceNumbers()](#syncdevicesequencenumbers)
   - [getNextSequenceNumber([nonce])](#getnextsequencenumbernonce)
   - [getBreakerRemoteHandlePosition()](#getbreakerremotehandleposition)
@@ -133,6 +135,18 @@ Updates the unicast UDP Key for a particular device provisioned via the [EMCB Cl
 EMCBs.updateUnicastUDPkey("30000c2a690c7652", Buffer.from("DD4253D8725A02A0C1FA3417D809686FE397CC8148EFF5328CE436644849A225", "hex")
 ```
 
+### getMasterIPAddress()
+
+Get the [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster)'s `ipAddress`.
+
+- **RETURNS** `Promise` _(Object)_: A `promise` that resolves with the following data or throws an [`Error`](https://nodejs.org/api/errors.html):
+  - `ipAddress` _(String)_: The IP Address of the Master's interface that is being used by the library.
+
+```javascript
+console.log(EMCBs.getDevice("30000c2a690c7652").idDevice)
+// 30000c2a690c7652
+```
+
 ### getDevice(ipAddressOrIdDevice)
 
 Get the [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the specified `ipAddress` or `idDevice`, assuming that it has been successfully discovered and is communicating with the [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster)/[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster).
@@ -176,6 +190,15 @@ EMCBs.discoverDevices()
 // 3000d8c46a572cf2,3000d8c46a572d8a,3000d8c46a572d5c,3000d8c46a572af0,3000d8c46a572c34,3000d8c46a572b08,3000d8c46a572aba,3000d8c46a572b34
 // **NOTE** this (and all logs from each specific device) will be colorized in terminals that support ANSI escape codes!
 ```
+
+## createDevice(idDevice, ipAddress, [unicastGetNextSequenceNumber])]
+
+Creates an [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for a given `idDevice` at a given `ipAddress` (assuming its UDP Key is provided to [new EmcbUDPbroadcastMaster(args)](#new-emcbudpbroadcastmasterargs)).
+
+- `idDevice` _(String)_:  Device ID.
+- `ipAddress` _(String)_: The local network IP Address of the device.
+- [`unicastGetNextSequenceNumber`] _(Boolean)_: Optional `true`/`false` to determine if the device's sequence number should be obtained via a unicast message.  Defaults to true.
+- **RETURNS** - `device` _(EmcbUDPdeviceMaster)_: The newly created [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) instance.
 
 ### syncDeviceSequenceNumbers()
 
@@ -610,6 +633,7 @@ The following commands from the [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmast
 
 - [updateBroadcastUDPkey(key)](#updatebroadcastudpkeykey)
 - [updateUnicastUDPkey(key)](#updateunicastudpkeyiddevice-key)
+- [getMasterIPAddress()](#getMasterIPAddress)
 - [getDevice(ipAddressOrIdDevice)](#getDeviceipaddressoriddevice)
 - [discoverDevices(nonce)](#discoverdevicesnonce)
 - [syncDeviceSequenceNumbers](#syncdevicesequencenumbers)
