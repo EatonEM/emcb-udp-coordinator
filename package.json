@@ -1,6 +1,6 @@
 {
   "name": "emcb-udp-master",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Module to discover, communicate, and and manage EMCBs using the local EMCB UDP API with both broadcast and unicast traffic.",
   "keywords": [
     "EMCB",
