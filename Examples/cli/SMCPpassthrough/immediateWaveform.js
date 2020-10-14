@@ -2,9 +2,9 @@ const UDP_MESSAGE_CODE_SMCP_PASSTHROUGH = 0x1234
 
 const {
     EmcbUDPbroadcastMaster,
-} = require('../..'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-master` module, replace with `require("emcb-udp-master")`
+} = require('../../..'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-master` module, replace with `require("emcb-udp-master")`
 
-const UDPKeys         = require("../_config.js");
+const UDPKeys         = require("../../_config.js");
 const { exitOnError } = require('winston');
 
 function delay(ms) {
