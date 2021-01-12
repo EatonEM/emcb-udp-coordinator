@@ -62,3 +62,6 @@ typings/
 
 # Config files containing UDP Keys
 Examples/_config.js
+
+# exclude any compiled files (they should be set as tagged releases)
+build
