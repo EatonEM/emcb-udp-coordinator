@@ -39,23 +39,12 @@ const { Readable }           = require('stream')
 const Json2csvTransform      = require('json2csv').Transform;
 const chalk                  = require('chalk');
 const numeral 				 = require('numeral');
-const util                   = require('util');
-const μsNow                  = require('microseconds');
 
 var jsonWriteStreams = {}
 
 var totalQueueDrains = 0
 var successes = 0
 var failures = 0
-
-var startTimeμs = 0;
-var timeAvg = 0;
-var timeMax = null;
-var timeMin = null;
-var numberOfAttempts = 0;
-var numberOfSuccessfulAttempts = 0;
-var numberOfFailedAttempts = 0;
-
 
 var EMCBs = new EmcbUDPbroadcastMaster({
     broadcastUDPKey : UDPKeys.broadcast,
@@ -178,72 +167,6 @@ EMCBs.on(EMCB_UDP_EVENT_QUEUE_DRAINED, () => {
 
 })
 
-function onRecordStats(data, logger = console.log)
-{
-    var timeμs = (μsNow.now() - startTimeμs);
-    if(data.responses === undefined && data.errors === undefined && data.timeouts === undefined){
-        logger(util.inspect(data));
-        lastKeyPress = 0;
-        console.log("--onRecordStats");
-        return;
-    }
-
-    var responses = [];
-    var errors = [];
-    var timeouts = [];
-    var ipAddress;
-
-    for(var ipAddress in data.responses){
-        var device = data.responses[ipAddress].device;
-        data.responses[ipAddress].device = device.idDevice;
-        responses.push(chalk[device.chalkColor](util.inspect(data.responses[ipAddress])));
-    }
-
-    for(var ipAddress in data.errors){
-        var errorString = data.errors[ipAddress].message;
-        var device = data.errors[ipAddress].device;
-        errors.push(chalk[device.chalkColor](device.idDevice + " - " + errorString));
-    }
-
-    for(var ipAddress in data.timeouts){
-        var errorString = data.timeouts[ipAddress].message;
-        var device = data.timeouts[ipAddress].device;
-        timeouts.push(chalk[device.chalkColor](device.idDevice + " - " + errorString));
-    }
-
-    if(responses.length)
-    {
-        numberOfSuccessfulAttempts++;
-        timeAvg += timeμs;
-        if((timeMax < timeμs) ||
-            (null === timeMax))
-        {
-            timeMax = timeμs;
-        }
-        if((timeMin > timeμs) ||
-            (null === timeMin))
-        {
-            timeMin = timeμs;
-        }
-        console.log("Success Attempt #" + numberOfSuccessfulAttempts + " time elapsed " + (timeμs/1000) + " ms");
-    }
-    if(errors.length || timeouts.length)
-    {
-        numberOfFailedAttempts++;
-    }
-}
-
-function moveMainHandle()
-{
-    console.log("Toggling Devices!")
-    startTimeμs = μsNow.now()
-    EMCBs.setBreakerState(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE, 1).then(onRecordStats)
-        .catch(err => {
-            logger.error("Unable to Toggle all breakers...")
-            logger.error(`Successes = [${Object.keys(err.responses || {}).join(",")}]; Timeouts = [${Object.keys(err.timeouts || {}).join(",")}]; Errors = [${Object.keys(err.errors || {}).join(",")}]`)
-        });
-}
-
 function discoverDevices(){
 
     EMCBs.discoverDevices()
@@ -276,15 +199,14 @@ function discoverDevices(){
 
             console.log(coloredDeviceArray.join(chalk.reset(",")))
 
-            setInterval(() => {    
-                console.log("Toggling Devices!");
-                numberOfAttempts++;
-                startTimeμs = μsNow.now();
-                EMCBs.setBreakerState(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE).then(onRecordStats).catch(err => {
+            setInterval(() => {
+                console.log("Toggling Devices!")
+                EMCBs.setBreakerState(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE)
+                    .catch(err => {
                         logger.error("Unable to Toggle all breakers...")
                         logger.error(`Successes = [${Object.keys(err.responses || {}).join(",")}]; Timeouts = [${Object.keys(err.timeouts || {}).join(",")}]; Errors = [${Object.keys(err.errors || {}).join(",")}]`)
-                    })        
-                }, 10050);    // The EMCB has a 10 second lockout timer between breaker control commands.  This ensures allows us to toggle at the max possible rate
+                    })
+            }, 10050)    // The EMCB has a 10 second lockout timer between breaker control commands.  This ensures allows us to toggle at the max possible rate
         })
         .catch(err => {
             console.error(err instanceof Error ? err.message : err)
@@ -310,23 +232,6 @@ process.on('SIGINT', function() {   //Ctrl + C
             errors: failures/numDevices,
             successes: successes/numDevices
         })
-
-        console.log(numberOfAttempts + " Attempts of the EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE command");
-        // console.info({
-        //     Failed_Attempts: numberOfFailedAttempts,
-        //     Successful_Attempts: numberOfSuccessfulAttempts,
-        //     Total_Time_ms: (timeAvg/1000),
-        //     Average_Time_ms: (timeAvg/(1000 * numberOfSuccessfulAttempts)),
-        //     Max_Time_ms: (timeMax/1000),
-        //     Min_Time_ms: (timeMin/1000)
-        // })
-
-        console.log("Failed Attempts = " + numberOfFailedAttempts);
-        console.log("Successful Attempts = " + numberOfSuccessfulAttempts);
-        console.log("Total Time = " + (timeAvg/1000) + " ms");
-        console.log("Average Time = " + (timeAvg/(1000 * numberOfSuccessfulAttempts)) + " ms");
-        console.log("Max Time = " + (timeMax/1000) + " ms");
-        console.log("Min Time = " + (timeMin/1000) + " ms");
 
         // Kill our streams and our process afterwards
         var ends = 0

@@ -31,107 +31,6 @@ for(var k in UDPKeys.unicast){
 module.exports = UDPKeys
 ```
 
-## Building the Main Branch Firmware for UDP support
-
-UDP support adds a ton of code to the firmware.  If you don't have a build already that is being targeted the following steps will show you how to trim down the code base enough so it will fit.  The following example is based upon the Master Branch in the eatonem repository.  Read the README.md in the [EM Device Firmware README](./em-device-firmware/README.md).
-
-Configuring the project file:
-In the project file for the device group that contains the target for the UDP communications, you will add the following builder variable to the list:
-
-```Squirrel
-            "builder": {
-                "variables": {
-                    "UDP": true
-                    ...
-                }
-            }
-```
-
-em-device-firmware/src/Implementation/UDP/udpSlave.device.nut modifications:
-There are 2 sections to uncomment. To activate the Broadcast and Unicast keys you will need to uncomment the lines below.  Also you will need to ensure that your key matches the key for the key type.  To format base64 key properly this website will give it in hex codes [Base64-to-Hex] (<https://cryptii.com/pipes/base64-to-hex>).
-
-```c
-// ::g_udpSlave.updateUDPKey(
-//     UDP_KEY.BROADCAST_PRIMARY,
-//     "\xDD\x42\x53\xD8\x72\x5A\x02\xA0\xC1\xFA\x34\x17\xD8\x09\x68\x6F\xE3\x97\xCC\x81\x48\xEF\xF5\x32\x8C\xE4\x36\x64\x48\x49\xA2\x25",
-//     5184000 // 60 days
-// )
-// g_udpSlave.updateUDPKey(
-//     UDP_KEY.UNICAST_PRIMARY,
-//     "\x05\xc4\x3a\x38\xdf\x56\x69\xf3\xd4\x10\x60\x24\x37\xec\x2e\xf3\xda\xeb\x12\xae\xd3\xc7\xeb\x3f\xa1\x92\xd5\x81\xd2\xab\x9f\x20",
-//     5184000
-//     )
-```
-
-em-device-firmware/src/device.nut modifications:
-In the main branch at the time of this README.md writing there are several items you will need to comment out to save enough space to build the UDP code.  the following is a list of lines to comment out.
-
-```C
-// @if HW_TARGET == "EMCB"
-// @include once "lib/LIS3DH/LIS3DH.lite.singleton.nut"
-// @include once "lib/TMP1x2/TMP1x2.lite.singleton.nut"
-// @end
-
-...
-
-// Configure the g_TempSensor Sensor
-// g_TempSensor <- TMP1x2.init(PORT_I2C, ADDRESS_TMP102);
-// g_Accelerometer <- LIS3DH.init(PORT_I2C, ADDRESS_LIS3DH);
-
-// // Configure accelerometer
-// g_Accelerometer.setDataRate(100);
-// g_Accelerometer.configureInterruptLatching(true);
-
-// //TODO: we are not currently using any of the accelerometer interrupts - we really should be monitoring for things like excessive vibration and sending events based on that.
-// // Set up a free-fall interrupt
-// g_Accelerometer.configureFreeFallInterrupt(true);
-
-// // Set up a double-click interrupt
-// g_Accelerometer.configureClickInterrupt(true, LIS3DH_DOUBLE_CLICK);
-
-// function accelInterruptHandler() {
-//     if (PIN_DI_IRQ_ACCEL.read() == 0) return;
-
-//     // Get + clear the interrupt + clear
-//     local data = g_Accelerometer.getInterruptTable();
-
-//     // Check what kind of interrupt it was
-//     if (data.int1) {
-//         server.log("Free Fall");
-//     }
-
-//     if (data.doubleClick) {
-//         // Flash white twice - each blink is on for 1 second, off for 0.5 seconds.
-//         g_Bargraph.fill(RGB_WHITE, 0, null, true, BARGRAPH_PRIORITY.ACCELEROMETER).draw()
-//         imp.wakeup(1.5 function(){ g_Bargraph.deleteLayer(BARGRAPH_PRIORITY.ACCELEROMETER)})
-//     }
-
-//   //TODO: Add accelerometer dynamic data
-// }
-
-// PIN_DI_IRQ_ACCEL.configure(DIGITAL_IN, accelInterruptHandler);
-
-...
-
-//@include once "src/Functions/Meter/BreakerHandlePosition.nut"
-
-...
-
-    //determineBreakerMainHandlePosition(data);
-
-...
-
-// @include "src/Implementation/DataManager/telemetry/registerAccelerometerTelemetryData.device.nut"
-// @include "src/Implementation/DataManager/telemetry/registerThermometerTelemetryData.emcb.device.nut"
-
-```
-
-When you deploy the firmware to your development group look for the following information in the log:
-
-2021-01-19T23:43:41.644 +00:00  [Status]    Agent restarted: reload.
-
-2021-01-19T23:43:42.095 +00:00  [Status]    Downloading new code; **99.98% program storage used**
-
 ## Command Line Interface Examples
 
 Examples in the [cli](./cli) folder, use a command line interface to interact with users and log/collect data.  These examples are described below:
@@ -263,7 +162,7 @@ rm logs/*.txt; rm logs/*.csv; node ./Examples/cli/writeDeviceDataToCSV.js
 # [+   0.255ms]info: SET_BREAKER_REMOTE_HANDLE_POSITION command succeeded!
 #[+ 569.365ms]info: Received GET_DEVICE_STATUS response from 10.130.116.110 with Device ID 30000c2a690e2ee2
 
-#Eample of the statistics recorded during the test for toggling the remote breaker handle
+#Example of the statistics recorded during the test for toggling the remote breaker handle
 #^C[+1024.261ms]info: Caught interrupt signal
 #[+   0.137ms]info: EMCBs._messageQueue.length = 0
 #[+   0.080ms]info: { messagesSent: 2013, errors: 90, successes: 1938 }
@@ -275,3 +174,59 @@ rm logs/*.txt; rm logs/*.csv; node ./Examples/cli/writeDeviceDataToCSV.js
 #[+   0.026ms]info: Max Time = 418.3754390258789 ms
 #[+   0.026ms]info: Min Time = 179.90867700195312 ms
 ```
+
+### disoverAndTestUDPLatency.js
+
+[discoverAndTestUDPLatency](./cli/discoverAndTestUDPLatency.js) is a tool that will discover devices on the local network and allow you to perform UDP latency testing with many of the UDP commands.  At the end of the test it will print out statistics about the test. When the app first runs it will give you a list of detected devices and prompt you with a list of commands that may be performed.
+
+```bash
+node ./examples/cli/discoverAndTestUDPLatency.js
+
+#[+ 884.348ms]info: DISCOVER DEVICES COMPLETE - found 1 EMCBs
+#[+   3.367ms]info: 30000c2a690e189e
+#[+  12.531ms]info: Press "ctrl+c" to exit...
+#[+   0.161ms]info: Which Test would you like to perform the UDP Analysis on?
+#[+   0.122ms]info: Press "o" to open all EMCBs, "c" to close, or "t" to toggle.
+#[+   0.462ms]info: Press "r" to cycle the bargraph LEDs on all breakers through the rainbow.
+#[+   0.143ms]info: Press "s" to Get Device Status (Breaker Feedback and Metering).
+#[+   0.123ms]info: Press "f" to Get Breaker Feedback Status.
+#[+   0.123ms]info: Press "m" to Get Meter Data.
+
+#[+   0.112ms]info: To identify local devices on the network used the following commands:
+#[+   0.165ms]info: Press "d" to Discover Devices and match their bargraph LEDs to the logged colors.
+#[+   0.159ms]info: Press "i" to identify individual Devices (log their ID's and shine their bargraph color to match terminal for 10 seconds).
+```
+
+When you select a command one of 2 options will be displayed.  This option is displayed if there is only 1 device to pick from.  You will see confirmation of the test to be performed then the test will run.  At the conclusion of the test, the results of the test will be printed to the screen.
+
+```bash
+#[+234607.488ms]info: Run Selected 'c' UDP Test!
+#[+1087.585ms]info:
+#1 Responses:
+{ ack: 0, state: 1, stateString: 'Closed', device: '30000c2a690e189e' }
+
+#[+   0.175ms]info: Success Attempt #1 time elapsed 85.183125 ms
+...
+
+#[+   0.171ms]info: Success Attempt #10 time elapsed 99.31174395751952 ms
+#[+10054.005ms]info: 10 Attempts of the EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED command
+#[+   0.217ms]info: Failed Attempts = 0
+#[+   0.135ms]info: Successful Attempts = 10
+#[+   0.130ms]info: Total Time = 579.4859309692383 ms
+#[+   0.120ms]info: Average Time = 57.94859309692383 ms
+#[+   0.111ms]info: Max Time = 151.49747399902344 ms
+#[+   0.101ms]info: Min Time = 28.863193969726563 ms
+```
+
+If there is more than on device available to pick from, you will be presented with a list of devices to pick.  You will need to enter the number of the device you wish to perform the testing with and then the test will begin.
+
+```bash
+#[+1261.120ms]info: Please select a device to test:
+#1: 30000c2a690e189e (192.168.3.166)
+#2: 30000C2a690e190e (192.168.3.186)
+ ...
+#1 [+ return]
+#[+234607.488ms]info: Run Selected 'c' UDP Test!
+#[+1087.585ms]info:
+#1 Responses:
+ ```

@@ -13,7 +13,6 @@ const UDPKeys                = require("../_config.js");
 const readline               = require('readline');
 const util                   = require('util');
 const chalk                  = require('chalk');
-const μsNow                  = require('microseconds');
 
 
 const rainbowColors = [
@@ -41,15 +40,6 @@ const rainbowColorNames = [
 var rainbowIdx = 0;
 
 var identifyIdx = 0;
-var lastCommand = null;
-var startTimeμs = 0;
-var timeAvg = 0;
-var timeMax = null;
-var timeMin = null;
-var numberOfAttempts = 0;
-var numberOfSuccessfulAttempts = 0;
-var numberOfFailedAttempts = 0;
-var testRunActive = false;
 
 
 
@@ -87,11 +77,11 @@ function discoverDevices(){
 				console.error(chalk.red("Did not find the following expected Devices: " + expectedDevices.join(", ")));
 			}
 
+
+
             function onSuccess(data, logger = console.log){
-                var timeμs = (μsNow.now() - startTimeμs);
                 if(data.responses === undefined && data.errors === undefined && data.timeouts === undefined){
                     logger(util.inspect(data));
-                    lastKeyPress = 0;
                     return;
                 }
 
@@ -129,181 +119,12 @@ function discoverDevices(){
                 var errorStr = errors.length > 0 ? chalk.reset(`\n${errors.length} Errors:\n`) + errors.join(chalk.reset(',\n')) : "";
                 var timeoutStr = timeouts.length > 0 ? chalk.reset(`\n${timeouts.length} Timeouts:\n`) + timeouts.join(chalk.reset(',\n')) : "";
 
-                logger(responseStr + errorStr + timeoutStr + '\n');
-                if(true === testRunActive)
-                {
-                    if(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED === lastCommand)
-                    {
-                        if(responses.length)
-                        {
-                            numberOfSuccessfulAttempts++;
-                            timeAvg += timeμs;
-                            if((timeMax < timeμs) ||
-                                (null === timeMax))
-                            {
-                                timeMax = timeμs;
-                            }
-                            if((timeMin > timeμs) ||
-                                (null === timeMin))
-                            {
-                                timeMin = timeμs;
-                            }
-                            console.log("Success Attempt #" + numberOfSuccessfulAttempts + " time elapsed " + (timeμs/1000) + " ms");
-                        }
-                        if(errors.length || timeouts.length)
-                        {
-                            numberOfFailedAttempts++;
-                        }
-                    }
-                    if(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED === lastCommand)
-                    {
-                        console.log("Test completed Attempt " + numberOfAttempts + " command " + "close" + " number of failed attempts " + numberOfFailedAttempts);
-                    }
-                    else
-                    {
-                        console.log("Test completed Attempt " + numberOfAttempts + " command " +  "open"  + " number of failed attempts " + numberOfFailedAttempts);
-                    }
-                    setTimeout(() => {  onTest(); }, 10000);
-                }
+				logger(responseStr + errorStr + timeoutStr + '\n');
 				// logger(util.inspect(data, false, 2));
-            }
-
-            function onTest()
-            {
-                if((100 > numberOfAttempts) &&
-                    (10 > numberOfSuccessfulAttempts))
-                {
-                    testRunActive = true;
-
-                    if(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED === lastCommand)
-                    {
-                        console.log("Open the Breaker");
-                        lastCommand = EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN;
-                        console.log("Sending Command " + lastCommand);
-                    }
-                    else
-                    {
-                        console.log("Attempt # " + ++numberOfAttempts);
-                        lastCommand = EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED;
-                        console.log("Sending Command " + lastCommand);
-                    }
-                    startTimeμs = μsNow.now();
-                    EMCBs.setBreakerState(lastCommand, 1).then(onSuccess).catch(onError);
-                }
-                else
-                {
-                    console.log(numberOfAttempts + " Attempts of the EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED command");
-                    // console.info({
-                    //     Failed_Attempts: numberOfFailedAttempts,
-                    //     Successful_Attempts: numberOfSuccessfulAttempts,
-                    //     Total_Time_ms: (timeAvg/1000),
-                    //     Average_Time_ms: (timeAvg/(1000 * numberOfSuccessfulAttempts)),
-                    //     Max_Time_ms: (timeMax/1000),
-                    //     Min_Time_ms: (timeMin/1000)
-                    // })
-            
-                    console.log("Failed Attempts = " + numberOfFailedAttempts);
-                    console.log("Successful Attempts = " + numberOfSuccessfulAttempts);
-                    console.log("Total Time = " + (timeAvg/1000) + " ms");
-                    console.log("Average Time = " + (timeAvg/(1000 * numberOfSuccessfulAttempts)) + " ms");
-                    console.log("Max Time = " + (timeMax/1000) + " ms");
-                    console.log("Min Time = " + (timeMin/1000) + " ms");
-                    testRunActive = false;
-                    if(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED == lastCommand)
-                    {
-                        EMCBs.setBreakerState(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN, 1).then(onSuccess).catch(onError);
-                    }
-                }
             }
 
             function onError(err){
                 onSuccess(err, console.error);
-            }
-
-            function executeAction(key)
-            {
-                if(key.name === 'o'){   // open
-                    EMCBs.setBreakerState(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN, 1).then(onSuccess).catch(onError);
-                }
-                else if(key.name === 'c'){  // close
-                    EMCBs.setBreakerState(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED, 1).then(onSuccess).catch(onError);
-                }
-                else if(key.name === 't'){ // toggle
-                    EMCBs.setBreakerState(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE, 1).then(onSuccess).catch(onError);
-                }
-
-                else if(key.name === 'd'){ // discover
-                    var colorize = function(){
-                        // Set the bargraph to the same color as what we are logging for 10 seconds!
-                        for(var ipAddress in EMCBs.devices){
-                            var device = EMCBs.devices[ipAddress];
-                            device.setBargraphLEDToUserDefinedColorName(device.chalkColor, 10, false).catch(onError);
-                        }
-                    };
-
-                    EMCBs.discoverDevices().then(devices => {
-                        var coloredDeviceArray = [];
-                        for(var ipAddress in devices){
-                            coloredDeviceArray.push(chalk[devices[ipAddress].chalkColor](devices[ipAddress].idDevice));
-                        }
-                        console.log("Discovered " + Object.keys(devices).length + " EMCBs - " + coloredDeviceArray.join(chalk.reset(", ")) + chalk.reset(""));
-                    })
-                    .catch(onError).then(() => {
-                        return EMCBs.syncDeviceSequenceNumbers().catch(onError);
-                    })
-                    .then(colorize)
-                    .catch(colorize);
-                }
-
-                else if(key.name === 'i'){ // identify device id
-
-                    var ipAddresses = Object.keys(EMCBs.devices).sort((a,b) => {
-                        if(EMCBs.devices[a].idDevice < EMCBs.devices[b].idDevice)
-                            return -1;
-                        else if(EMCBs.devices[a].idDevice > EMCBs.devices[b].idDevice)
-                            return 1;
-                        else
-                            throw new Error("How do we have 2 of the same deviceID === " + EMCBs.devices[a].idDevice);
-                    });
-
-                    // Turn the bargraph to the same color as what we are logging for 10 seconds for a specific device!
-                    var device = EMCBs.devices[ipAddresses[identifyIdx % ipAddresses.length]];
-
-                    console.log(chalk[device.chalkColor](`Identifying Device ${device.idDevice} using color ${device.chalkColor}`));
-
-                    device.setBargraphLEDToUserDefinedColorName(device.chalkColor, 10, false).catch(onError);
-                    identifyIdx++;
-                }
-
-                else if(key.name === 'r') { // Rainbow
-                    var colorObj = new Array(5);
-
-                    var color = rainbowColors[rainbowIdx];
-                    color.blinking = false;
-
-                    colorObj.fill(color, 1, 4);
-
-                    console.log("Setting color to " + chalk.keyword(rainbowColorNames[rainbowIdx])(rainbowColorNames[rainbowIdx] == "white" ? "Normal Operation" : rainbowColorNames[rainbowIdx]));
-                    EMCBs.setBargraphLEDToUserDefinedColor(rainbowIdx === rainbowColors.length-1 ? false : true, colorObj, 0).then(onSuccess).catch(onError);
-
-                    rainbowIdx = (rainbowIdx+1) % rainbowColors.length;    // Start with red to make a proper rainbow!
-                }
-
-                else if(key.name === 's'){  // status
-                    EMCBs.getDeviceStatus().then(onSuccess).catch(onError);
-                }
-
-                else if(key.name === 'f') { // feedback state
-                    EMCBs.getBreakerRemoteHandlePosition().then(onSuccess).catch(onError);
-                }
-
-                else if(key.name === 'm'){ // getMeterData
-                    EMCBs.getMeterData().then(onSuccess).catch(onError);
-                }
-
-                else if(key.name === 'g'){ // getNextSequenceNumber
-                    EMCBs.getNextSequenceNumber().then(onSuccess).catch(onError);
-                }
             }
 
             readline.emitKeypressEvents(process.stdin);
@@ -314,30 +135,92 @@ function discoverDevices(){
                     console.log("Terminating interactive application");
                     process.exit();
                 } else {
-                    if(true === testRunActive)
-                    {
-                        console.log("A test run is currently active please wait for the run to completed before sending another command.");
+                    if(key.name === 'o'){   // open
+                        EMCBs.setBreakerState(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN, 1).then(onSuccess).catch(onError);
                     }
-                    else if(key.shift && key.name === 't')
-                    {
-                        console.log("detected Test run!");
-                        numberOfAttempts = 0;
-                        numberOfFailedAttempts = 0;
-                        numberOfSuccessfulAttempts = 0;
-                        timeAvg = 0;
-                        timeMax = null;
-                        timeMin = null;
-                        setTimeout(() => { onTest(); }, 1000);
+                    else if(key.name === 'c'){  // close
+                        EMCBs.setBreakerState(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED, 1).then(onSuccess).catch(onError);
                     }
-                    else 
-                    {
-                        executeAction(key);
+                    else if(key.name === 't'){ // toggle
+                        EMCBs.setBreakerState(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE, 1).then(onSuccess).catch(onError);
+                    }
+
+                    else if(key.name === 'd'){ // discover
+                        var colorize = function(){
+                            // Set the bargraph to the same color as what we are logging for 10 seconds!
+                            for(var ipAddress in EMCBs.devices){
+                                var device = EMCBs.devices[ipAddress];
+                                device.setBargraphLEDToUserDefinedColorName(device.chalkColor, 10, false).catch(onError);
+                            }
+                        };
+
+                        EMCBs.discoverDevices().then(devices => {
+                            var coloredDeviceArray = [];
+                            for(var ipAddress in devices){
+                                coloredDeviceArray.push(chalk[devices[ipAddress].chalkColor](devices[ipAddress].idDevice));
+                            }
+                            console.log("Discovered " + Object.keys(devices).length + " EMCBs - " + coloredDeviceArray.join(chalk.reset(", ")) + chalk.reset(""));
+                        })
+                        .catch(onError).then(() => {
+                            return EMCBs.syncDeviceSequenceNumbers().catch(onError);
+                        })
+                        .then(colorize)
+                        .catch(colorize);
+                    }
+
+                    else if(key.name === 'i'){ // identify device id
+
+                        var ipAddresses = Object.keys(EMCBs.devices).sort((a,b) => {
+                            if(EMCBs.devices[a].idDevice < EMCBs.devices[b].idDevice)
+                            	return -1;
+                            else if(EMCBs.devices[a].idDevice > EMCBs.devices[b].idDevice)
+                            	return 1;
+                            else
+                            	throw new Error("How do we have 2 of the same deviceID === " + EMCBs.devices[a].idDevice);
+                        });
+
+                        // Turn the bargraph to the same color as what we are logging for 10 seconds for a specific device!
+                        var device = EMCBs.devices[ipAddresses[identifyIdx % ipAddresses.length]];
+
+                        console.log(chalk[device.chalkColor](`Identifying Device ${device.idDevice} using color ${device.chalkColor}`));
+
+                        device.setBargraphLEDToUserDefinedColorName(device.chalkColor, 10, false).catch(onError);
+                        identifyIdx++;
+                    }
+
+                    else if(key.name === 'r') { // Rainbow
+                        var colorObj = new Array(5);
+
+                        var color = rainbowColors[rainbowIdx];
+                        color.blinking = false;
+
+                        colorObj.fill(color, 1, 4);
+
+                        console.log("Setting color to " + chalk.keyword(rainbowColorNames[rainbowIdx])(rainbowColorNames[rainbowIdx] == "white" ? "Normal Operation" : rainbowColorNames[rainbowIdx]));
+                        EMCBs.setBargraphLEDToUserDefinedColor(rainbowIdx === rainbowColors.length-1 ? false : true, colorObj, 0).then(onSuccess).catch(onError);
+
+                        rainbowIdx = (rainbowIdx+1) % rainbowColors.length;    // Start with red to make a proper rainbow!
+                    }
+
+                    else if(key.name === 's'){  // status
+                        EMCBs.getDeviceStatus().then(onSuccess).catch(onError);
+                    }
+
+                    else if(key.name === 'f') { // feedback state
+                        EMCBs.getBreakerRemoteHandlePosition().then(onSuccess).catch(onError);
+                    }
+
+                    else if(key.name === 'm'){ // getMeterData
+                        EMCBs.getMeterData().then(onSuccess).catch(onError);
+                    }
+
+                    else if(key.name === 'g'){ // getNextSequenceNumber
+                        EMCBs.getNextSequenceNumber().then(onSuccess).catch(onError);
                     }
                 }
             });
 
             console.log(`Press "ctrl+c" to exit...`);
-            console.log(`Press "shift+t" to perform a repeated test`);
             console.log(`Press "o" to open all EMCBs, "c" to close, or "t" to toggle.`);
             console.log(`Press "r" to cycle the bargraph LEDs on all breakers through the ${chalk.red("r")}${chalk.keyword("orange")("a")}${chalk.yellow("i")}${chalk.green("n")}${chalk.blue("b")}${chalk.keyword("violet")("o")}${chalk.keyword("indigo")("w")}.`);
             console.log(`Press "d" to Discover Devices and match their bargraph LEDs to the logged colors.`);
