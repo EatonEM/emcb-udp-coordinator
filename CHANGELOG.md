@@ -11,6 +11,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - unicast only mode
 - per message timeouts (that can be longer than our throttle time) / greedy sending working in concert with "throttling"
 
+## [0.11.0] - 2021-02-17
+
+### Added
+
+- UDP latency tests.  New file `Examples/cli/discoverAndTestUDPLatency.js`
+
+### Changed
+
+- Updated `Examples/README.md` to include new UDP latency tests information.
+
 ## [0.10.0] - 2019-06-26
 
 ### Added
