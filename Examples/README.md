@@ -1,46 +1,64 @@
 # Examples
 
-These examples are provided to demonstrate how to use the `emcb-udp-master` module.
-
-> **NOTE** - The UDP API of the EMCB is currently in Beta.  To use this module and these examples, you must have an EMCB that has been enrolled in the UDP API Beta on the same Local Area Network as the machine you are running the scripts on.  For more information, contact Eaton.
+These examples are provided to demonstrate how to use the EMLCP Node.JS SDK.
 
 ------------
 
 ## Configure the Examples
 
-All of the examples use [Examples/_config.js](./_config.js) to import the required UDP Keys for interacting with the devices.  Create a [_config.js](./_config.js) and edit it with your devices' keys setup using the [EMCB Cloud API](portal.developer.eatonem.com).
+All of the examples use [Examples/_config.js](./_config.js) to import the
+required UDP Keys for interacting with the devices.  Create a
+[_config.js](./_config.js) and edit it with your devices' keys setup using the
+[EM Partner API](https://api.em.eaton.com/docs#section/EM-API-Overview/Understanding-Local-Communications).
 
 ```javascript
-// All of our UDP Keys, stored as 32 character hex strings.  These will be converted to Buffers before use in our application
+// NOTE: All of our UDP Keys, stored as base64-encoded strings. These will be converted to Buffers before use in our application. 
+var keyEncoding = "base64";
 var UDPKeys = {
-    "broadcast": "DD4253D8725A02A0C1FA3417D809686FE397CC8148EFF5328CE436644849A225",
+    "broadcast": "3UJT2HJaAqDB+jQX2Alob+OXzIFI7/UyjOQ2ZEhJoiU=",
     "unicast": {
-        "30000c2a690c7652" : "01C43A38DF5669F3D410602437EC2EF3DAEB12AED3C7EB3FA192D581D2AB9F20",
-        "30000c2a69112b6f" : "9F3D410602437EC2EFDD4253D8712AED3C7EB3FAE3417D809686FE397CC8148E"
+        "30000c2a690c7652" : "AcQ6ON9WafPUEGAkN+wu89rrEq7Tx+s/oZLVgdKrnyA=",
+        "30000c2a69112b6f" : "nz1BBgJDfsLv3UJT2HEq7Tx+s/rjQX2Alob+OXzIFI4="
     }
 }
-```
 
-// Convert from Hex strings to buffers
-UDPKeys.broadcast = Buffer.from(UDPKeys.broadcast, "hex")
+// Alternatively, use keys as 32 character hex strings.  
+// var keyEncoding = "hex";
+// var UDPKeys = {
+//     "broadcast": "DD4253D8725A02A0C1FA3417D809686FE397CC8148EFF5328CE436644849A225",
+//     "unicast": {
+//         "30000c2a690c7652" : "01C43A38DF5669F3D410602437EC2EF3DAEB12AED3C7EB3FA192D581D2AB9F20",
+//         "30000c2a69112b6f" : "9F3D410602437EC2EFDD4253D8712AED3C7EB3FAE3417D809686FE397CC8148E"
+//     }
+// }
+
+// Convert to buffers
+UDPKeys.broadcast = Buffer.from(UDPKeys.broadcast, keyEncoding)
 
 for(var k in UDPKeys.unicast){
-    UDPKeys.unicast[k] = Buffer.from(UDPKeys.unicast[k], "hex")
+    UDPKeys.unicast[k] = Buffer.from(UDPKeys.unicast[k], keyEncoding)
 }
 
-module.exports = UDPKeys
+module.exports = UDPKeys;
+```
 
 ### Command Line Interface Examples
 
-Examples in the [cli](./cli) folder, use a command line interface to interact with users and log/collect data.  These examples are described below:
+Examples in the [cli](./cli) folder, use a command line interface to interact
+with users and log/collect data.  These examples are described below:
 
 #### discoverAndControl.js
 
-[discoverAndControl](./cli/discoverAndControl.js) is a minimalistic command line tool to:
+[discoverAndControl](./cli/discoverAndControl.js) is a minimalistic command line
+tool to:
 
-- discover EMCB's on the local network using the provisioned UDP keys in [_config.js](./_config.js)
-- identify them by turning their Bargraph LEDs to match the color that they are being logged by the terminal for 10 seconds (using [chalk](https://www.npmjs.com/package/chalk))
-- and instruct them to `open`, `close`, or `toggle` (defaulting to `toggle` if no command is given)
+- discover EM Node(s) on the local network using the provisioned UDP keys in
+  [_config.js](./_config.js)
+- identify them by turning their Bargraph LEDs to match the color that they are
+  being logged by the terminal for 10 seconds (using
+  [chalk](https://www.npmjs.com/package/chalk))
+- and instruct them to `open`, `close`, or `toggle` (defaulting to `toggle` if
+  no command is given)
 
 ```bash
 # Clean up log files from an previous runs of the tool
@@ -71,11 +89,17 @@ node ./Examples/cli/discoverAndControl.js close
 
 #### discoverAndInteractiveControl.js
 
-[discoverAndInteractiveControl](./cli/discoverAndInteractiveControl.js) extends [discoverAndControl](./cli/discoverAndControl.js) to include a keyboard interface for user input.  It will:
+[discoverAndInteractiveControl](./cli/discoverAndInteractiveControl.js) extends
+[discoverAndControl](./cli/discoverAndControl.js) to include a keyboard
+interface for user input.  It will:
 
-- discover EMCB's on the local network using the provisioned UDP keys in [_config.js](./_config.js)
-- identify them by turning their Bargraph LEDs to match the color that they are being logged by the terminal for 10 seconds (using [chalk](https://www.npmjs.com/package/chalk))
-- and log a set of keyboard inputs that can be used on the focused terminal to send various commands
+- discover EM Node(s) on the local network using the provisioned UDP keys in
+  [_config.js](./_config.js)
+- identify them by turning their Bargraph LEDs to match the color that they are
+  being logged by the terminal for 10 seconds (using
+  [chalk](https://www.npmjs.com/package/chalk))
+- and log a set of keyboard inputs that can be used on the focused terminal to
+  send various commands
 
 ```bash
 # Clean up log files from an previous runs of the tool and start the script
@@ -94,17 +118,29 @@ rm logs/*.txt; rm logs/*.csv; node ./Examples/cli/discoverAndInteractiveControl.
 #[+   0.153ms]info: Press "m" to Get Meter Data.
 ```
 
-Combined with `tail logs/logs.txt -f`, this is a very powerful tool to familiarize developers with the [EMCB UDP API](./docs/EMCB\ UDP\ API.pdf) and binary protocol.
+Combined with `tail logs/logs.txt -f`, this is a very powerful tool to
+familiarize developers with the [EM Local Communications
+Protocol](https://api.em.eaton.com/docs/emlcp.html) and binary protocol.
 
-> **NOTE** - This tool is great for debugging, but it does NOT implement `.on(`[EMCB_UDP_EVENT_QUEUE_DRAINED](./../docs/API.md#EMCB_UDP_EVENT_QUEUE_DRAINED)`)` [EventEmitter](https://nodejs.org/api/events.html) callback for polling and should therefore **NOT** be used as a reference for a production application.
+> **NOTE** - This tool is great for debugging, but it does NOT implement
+> `.on(`[EMCB_UDP_EVENT_QUEUE_DRAINED](./../docs/api.md#EMCB_UDP_EVENT_QUEUE_DRAINED)`)`
+> [EventEmitter](https://nodejs.org/api/events.html) callback for polling and
+> should therefore **NOT** be used as a reference for a production application.
 
 #### discoverAndLogData.js
 
-[discoverAndLogData](./cli/discoverAndLogData.js) is another "one shot" tool for discovering and logging device status data.  It shows some different [ECMAScript 6](https://www.w3schools.com/js/js_es6.asp) syntax and functionality than the previous examples.  The example does the following:
+[discoverAndLogData](./cli/discoverAndLogData.js) is another "one shot" tool for
+discovering and logging device status data.  It shows some different [ECMAScript
+6](https://www.w3schools.com/js/js_es6.asp) syntax and functionality than the
+previous examples.  The example does the following:
 
-- discover EMCB's on the local network using the provisioned UDP keys in [_config.js](./_config.js)
-- identify them by turning their Bargraph LEDs to match the color that they are being logged by the terminal for 10 seconds (using [chalk](https://www.npmjs.com/package/chalk))
-- Log the [`getDeviceStatus`](./../docs/API.md#getdevicestatus) command, which includes both breaker feedback status and the current metering values
+- discover EM Node(s) on the local network using the provisioned UDP keys in
+  [_config.js](./_config.js)
+- identify them by turning their Bargraph LEDs to match the color that they are
+  being logged by the terminal for 10 seconds (using
+  [chalk](https://www.npmjs.com/package/chalk))
+- Log the [`getDeviceStatus`](./../docs/api.md#getdevicestatus) command, which
+  includes both breaker feedback status and the current metering values
 
 ```bash
 # Clean up log files from an previous runs of the tool and start the script
@@ -117,14 +153,24 @@ rm logs/*.txt; rm logs/*.csv; node ./Examples/cli/discoverAndLogData.js
 
 #### writeDeviceDataToCSV.js
 
-[writeDeviceDataToCSV](./cli/writeDeviceDataToCSV.js) is the most feature rich example application, serving as a complete data logger for the EMCB. This application is suitable for longer term testing and analysis and does the following:
+[writeDeviceDataToCSV](./cli/writeDeviceDataToCSV.js) is the most feature rich
+example application, serving as a complete data logger for EM Node(s). This
+application is suitable for longer term testing and analysis and does the
+following:
 
-- discover EMCB's on the local network using the provisioned UDP keys in [_config.js](./_config.js)
-- identify them by turning their Bargraph LEDs to match the color that they are being logged by the terminal for 10 seconds (using [chalk](https://www.npmjs.com/package/chalk))
-- Logs most of the interesting EMCB Events described in the [EventEmitter Cheat Sheet](./../docs/API.md#eventemitter-cheat-sheet)
-- Begins polling the [`getDeviceStatus`](./../docs/API.md#getdevicestatus) as aggressively as possible by using the `.on(`[EMCB_UDP_EVENT_QUEUE_DRAINED](./../docs/API.md#EMCB_UDP_EVENT_QUEUE_DRAINED)`)` [EventEmitter](https://nodejs.org/api/events.html)
+- discover EM Node(s) on the local network using the provisioned UDP keys in
+  [_config.js](./_config.js)
+- identify them by turning their Bargraph LEDs to match the color that they are
+  being logged by the terminal for 10 seconds (using
+  [chalk](https://www.npmjs.com/package/chalk))
+- Logs most of the interesting EM Node events described in the [EventEmitter Cheat
+  Sheet](./../docs/api.md#eventemitter-cheat-sheet)
+- Begins polling the [`getDeviceStatus`](./../docs/api.md#getdevicestatus) as
+  aggressively as possible by using the
+  `.on(`[EMCB_UDP_EVENT_QUEUE_DRAINED](./../docs/api.md#EMCB_UDP_EVENT_QUEUE_DRAINED)`)`
+  [EventEmitter](https://nodejs.org/api/events.html)
 - Writes all of the collected data to individual `.csv` files in `./logs`
-- Toggles the EMCBs every 10 seconds
+- Toggles the EM Node(s) every 10 seconds
 
 ```bash
 # Clean up log files from an previous runs of the tool and start the script
