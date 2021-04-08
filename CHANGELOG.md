@@ -8,6 +8,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.10.1] - 2021-04-08
+
 ### Fixed
 
 - Update all documentation for EMLCP Node.JS SDK
@@ -85,6 +87,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Initial Public (Alpha) Release!
 
+[0.10.1]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.10.1
 [0.10.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.10.0
 [0.9.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.9.0
 [0.8.1]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.8.1
