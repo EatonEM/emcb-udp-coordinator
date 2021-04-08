@@ -38,7 +38,8 @@ Relevant Documentation can be found at:
 Terminology:
 
 - EMLCP: Energy Management Local Communications Protocol
-- EM Node: A generic name for an EM Device on the local network
+- EM Node: A generic name for an EM Device (including EMCBs) on the local
+  network
 - EM Coordinator: A name for the coordinator that is utilizing the [EM Local
   Communications Protocol](https://api.em.eaton.com/docs/emlcp.html) to
   communicate with EM Nodes on the local network (this Node.JS SDK serves as an
@@ -47,6 +48,11 @@ Terminology:
 **NOTE:** Some documentation and much of the implementation in this SDK utilize
 Master/Slave terminology, but will be updated to use Coordinator/Node terminology
 throughout in a later release.
+
+**NOTE:** The implementation utilizes `Emcb` and `EMCB` as a prefix for several
+entities and constants, such as `EmcbUDPbroadcastMaster` and
+`EMCB_UDP_MESSAGE_CODE_GET_DEVICE_STATUS`, and this will be updated to use more
+generic `EmNode` and `EM_LCP` terminology throughout in a later release.
 
 ## Installation
 
