@@ -85,5 +85,4 @@ function exit(dummy){
     process.exit()
 }
 
-discoverDevices().then(exit)
-
+discoverDevices().then(exit);

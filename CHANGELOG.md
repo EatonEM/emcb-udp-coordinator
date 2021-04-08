@@ -8,11 +8,21 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-## [0.10.1] - 2021-04-08
+## [0.11.1] - 2021-04-07
 
 ### Fixed
 
 - Update all documentation for EMLCP Node.JS SDK
+
+## [0.11.0] - 2021-02-17
+
+### Added
+
+- UDP latency tests.  New file `Examples/cli/discoverAndTestUDPLatency.js`
+
+### Changed
+
+- Updated `Examples/README.md` to include new UDP latency tests information.
 
 ## [0.10.0] - 2019-06-26
 
@@ -87,7 +97,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Initial Public (Alpha) Release!
 
-[0.10.1]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.10.1
+[0.11.1]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.11.1
+[0.11.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.11.0
 [0.10.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.10.0
 [0.9.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.9.0
 [0.8.1]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.8.1

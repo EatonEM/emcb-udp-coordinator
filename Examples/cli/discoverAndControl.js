@@ -79,4 +79,4 @@ function discoverDevices(){
             }, 5000)
         })
 }
-discoverDevices()
+discoverDevices();

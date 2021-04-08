@@ -1,6 +1,6 @@
 {
   "name": "emcb-udp-master",
-  "version": "0.10.1",
+  "version": "0.11.1",
   "description": "Module to discover, communicate, and and manage EM Nodes using the EM Local Communications Protocol (EMLCP) with both broadcast and unicast traffic.",
   "keywords": [
     "EMCB",
