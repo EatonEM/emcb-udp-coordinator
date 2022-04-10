@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "socket.io": "^2.2.0",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.6",
     "json2csv": "^4.4.1",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
