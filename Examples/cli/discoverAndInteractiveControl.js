@@ -1,6 +1,12 @@
 /*jshint esversion: 6 */
 
 const {
+    discoverDevicesErrorLogger,
+    exitProcess,
+    logExceptionAndExitProcess
+} = require('./lib/shared')
+
+const {
     EmcbUDPbroadcastMaster,
     logger,
 
@@ -50,7 +56,7 @@ var EMCBs = new EmcbUDPbroadcastMaster({
 });
 
 
-function discoverDevices(){
+function runExample(){
     EMCBs.discoverDevices()
         .then((devices) => {
 			console.log("DISCOVER DEVICES COMPLETE - found " + Object.keys(devices).length + " EMCBs");
@@ -72,12 +78,12 @@ function discoverDevices(){
             }
 
 			console.log(coloredDeviceArray.join(chalk.reset(", ")) + chalk.reset(""));
+            console.log("");
 
 			if(expectedDevices.length){
 				console.error(chalk.red("Did not find the following expected Devices: " + expectedDevices.join(", ")));
+                console.log("");
 			}
-
-
 
             function onSuccess(data, logger = console.log){
                 if(data.responses === undefined && data.errors === undefined && data.timeouts === undefined){
@@ -107,8 +113,6 @@ function discoverDevices(){
                     var device = data.timeouts[ipAddress].device;
                     timeouts.push(chalk[device.chalkColor](device.idDevice + " - " + errorString));
                 }
-
-
 
                 // Sort for consistent rainbow colors!
                 responses.sort();
@@ -217,10 +221,19 @@ function discoverDevices(){
                     else if(key.name === 'g'){ // getNextSequenceNumber
                         EMCBs.getNextSequenceNumber().then(onSuccess).catch(onError);
                     }
+
+                    else if (key.name === 'escape') { //exit
+                        exitProcess();
+                    }
+
+                    else {
+                        logger.warn(`Ignoring key press for '${key.name}'`)
+                    }
                 }
             });
 
-            console.log(`Press "ctrl+c" to exit...`);
+            console.log(chalk.yellow(`Press "esc" to exit`))
+            console.log(``)
             console.log(`Press "o" to open all EMCBs, "c" to close, or "t" to toggle.`);
             console.log(`Press "r" to cycle the bargraph LEDs on all breakers through the ${chalk.red("r")}${chalk.keyword("orange")("a")}${chalk.yellow("i")}${chalk.green("n")}${chalk.blue("b")}${chalk.keyword("violet")("o")}${chalk.keyword("indigo")("w")}.`);
             console.log(`Press "d" to Discover Devices and match their bargraph LEDs to the logged colors.`);
@@ -228,14 +241,17 @@ function discoverDevices(){
             console.log(`Press "s" to Get Device Status (Breaker Feedback and Metering).`);
             console.log(`Press "f" to Get Breaker Feedback Status.`);
             console.log(`Press "m" to Get Meter Data.`);
+            console.log(``)
+            console.log(chalk.yellow(`Press "ctrl+c" to kill process...`));
 
         })
         .catch(err => {
-            logger.error(util.inspect(err));
-            logger.info("Retrying in 5 seconds");
+            discoverDevicesErrorLogger(err);
+            logger.info("Retrying Device Discovery in 5 seconds")
             setTimeout(() => {
-                discoverDevices();
-            }, 5000);
-        });
+                runExample()
+            }, 5000)
+    });
 }
-discoverDevices();
+
+runExample();

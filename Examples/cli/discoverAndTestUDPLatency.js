@@ -1,6 +1,12 @@
 /*jshint esversion: 6 */
 
 const {
+    discoverDevicesErrorLogger,
+    exitProcess,
+    logExceptionAndExitProcess
+} = require('./lib/shared')
+
+const {
     EmcbUDPbroadcastMaster,
     logger,
 
@@ -71,7 +77,7 @@ var EMCBs = new EmcbUDPbroadcastMaster({
 });
 
 
-function discoverDevices(){
+function runExample(){
     EMCBs.discoverDevices()
         .then((devices) => {
 			console.log("DISCOVER DEVICES COMPLETE - found " + Object.keys(devices).length + " EMCBs");
@@ -93,9 +99,11 @@ function discoverDevices(){
             }
 
 			console.log(coloredDeviceArray.join(chalk.reset(", ")) + chalk.reset(""));
+            console.log("")
 
 			if(expectedDevices.length){
 				console.error(chalk.red("Did not find the following expected Devices: " + expectedDevices.join(", ")));
+                console.log("");
 			}
 
             function onSuccess(data, logger = console.log){
@@ -207,17 +215,20 @@ function discoverDevices(){
             }
 
             function printDirections(){
-                console.log(`Press "ctrl+c" to exit...`);
+                console.log(chalk.yellow(`Press "esc" to exit`))
+                console.log(``)
                 console.log(`Which Test would you like to perform the UDP Analysis on?`);
                 console.log(`Press "o" to open all EMCBs, "c" to close, or "t" to toggle.`);
                 console.log(`Press "r" to cycle the bargraph LEDs on all breakers through the ${chalk.red("r")}${chalk.keyword("orange")("a")}${chalk.yellow("i")}${chalk.green("n")}${chalk.blue("b")}${chalk.keyword("violet")("o")}${chalk.keyword("indigo")("w")}.`);
                 console.log(`Press "s" to Get Device Status (Breaker Feedback and Metering).`);
                 console.log(`Press "f" to Get Breaker Feedback Status.`);
                 console.log(`Press "m" to Get Meter Data.`);    
-                process.stdout.write("\n");
+                console.log(``)
                 console.log(`To identify local devices on the network used the following commands:`);
                 console.log(`Press "d" to Discover Devices and match their bargraph LEDs to the logged colors.`);
                 console.log(`Press "i" to identify individual Devices (log their ID's and shine their bargraph color to match terminal for 10 seconds).`);
+                console.log(``)
+                console.log(chalk.yellow(`Press "ctrl+c" to kill process...`));
             }
 
             function executeAction(key){
@@ -330,13 +341,13 @@ function discoverDevices(){
             process.stdin.on('keypress', (str, key) => {
                 if (key.ctrl && (key.name === 'c')) {
                     console.log("Terminating interactive application");
-                    process.exit();
-                }
-
-                else {
+                    exitProcess();
+                } else if (key.name === 'escape') {
+                    exitProcess();
+                } else {
 
                     if(profilingConfig.active === true){
-                        console.log("A test run is currently active please wait for the run to completed before sending another command.");
+                        console.log("A test run is currently active. Please wait for the run to completed before sending another command.");
                     }
 
                     else if (profilingConfig.commandKey == null){
@@ -357,7 +368,7 @@ function discoverDevices(){
                                 }
 
                                 else if(Object.keys(EMCBs.devices).length == 0){
-                                    throw new Error("ERROR!! No devices found when selecting an UDP test!!");
+                                    throw new Error("No devices found when selecting an UDP test!");
                                 }
                                 
 
@@ -366,7 +377,7 @@ function discoverDevices(){
                                     var count = 1;
                                     for(var ipAddress in EMCBs.devices){
                                         devicesUnderTest.push({idDevice: EMCBs.devices[ipAddress].idDevice , ipAddress: ipAddress});
-                                        process.stdout.write(count + ": " + EMCBs.devices[ipAddress].idDevice + " (" + ipAddress + ")\n");
+                                        process.stdout.write(`[${count}]: ${EMCBs.devices[ipAddress].idDevice} (${ipAddress})\n`);
                                         count++;
                                     }
                                 }
@@ -461,11 +472,12 @@ function discoverDevices(){
             printDirections();
         })  
         .catch(err => {
-            logger.error(util.inspect(err));
-            logger.info("Retrying in 5 seconds");
+            discoverDevicesErrorLogger(err);
+            logger.info("Retrying Device Discovery in 5 seconds")
             setTimeout(() => {
-                discoverDevices();
-            }, 5000);
-        });//end of EMCBs.discoverDevices() promise
+                runExample()
+            }, 5000)
+        });
 }
-discoverDevices();
+
+runExample();

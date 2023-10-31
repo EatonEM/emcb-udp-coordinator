@@ -1,4 +1,10 @@
 const {
+    discoverDevicesErrorLogger,
+    exitProcess,
+    logExceptionAndExitProcess
+} = require('./lib/shared')
+
+const {
 
     EmcbUDPbroadcastMaster,
     logger,
@@ -43,7 +49,6 @@ var localDevices = new EmcbUDPbroadcastMaster({
     broadcastUDPKey : UDPKeys.broadcast,
     unicastUDPKeys  : UDPKeys.unicast
 })
-
 
 // Called whenever there is a response to a GET_NEXT_SEQUENCE_NUMBER command
 localDevices.on(EMCB_UDP_MESSAGE_CODE_GET_NEXT_SEQUENCE_NUMBER, data => {
@@ -106,7 +111,7 @@ localDevices.on(EMCB_UDP_EVENT_QUEUE_DRAINED, () => {
 
 })
 
-function discoverDevices(){
+function runExample(){
     localDevices.discoverDevices()
         .then((devices) => {
             console.log("DISCOVER DEVICES COMPLETE - found " + Object.keys(devices).length + " devices on the local network!")
@@ -133,15 +138,13 @@ function discoverDevices(){
             console.log(coloredDeviceArray.join(chalk.reset(",")))
         })
         .catch(err => {
-            console.error(err instanceof Error ? err.message : err)
+            discoverDevicesErrorLogger(err);
             logger.info("Retrying Device Discovery in 5 seconds")
             setTimeout(() => {
-                discoverDevices()
+                runExample()
             }, 5000)
         })
 }
-
-discoverDevices()
 
 process.on('SIGINT', function() {
     try{
@@ -166,18 +169,19 @@ process.on('SIGINT', function() {
             jsonWriteStreams[ipAddress].processor.end(() => {
                 ends++
 
-                if(ends === Object.keys(jsonWriteStreams).length)
-                    process.exit();
+                if(ends === Object.keys(jsonWriteStreams).length) {
+                    exitProcess();
+                }
             })
         }
 
-        if(Object.keys(jsonWriteStreams).length === 0)
-            process.exit();
+        if(Object.keys(jsonWriteStreams).length === 0) {
+            exitProcess();
+        }
 
     } catch(ex){
-        console.error("process.on SIGINT threw an error...")
-        console.error(ex);
-        process.exit();
+        logExceptionAndExitProcess();
     }
-
 });
+
+runExample();
