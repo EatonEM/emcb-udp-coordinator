@@ -5,6 +5,8 @@ const {
 
 const UDPKeys                = require("../../_config.js")
 
+const util = require('util')
+
 var EMCBs = new EmcbUDPbroadcastMaster({
     broadcastUDPKey : UDPKeys.broadcast,
     unicastUDPKeys  : UDPKeys.unicast
@@ -16,14 +18,6 @@ var deviceIP = argv._[1];
 
 var device = EMCBs.createDevice(deviceID, deviceIP, true);
 
-function parseGetMeterDataResponse(response){
-    // clone the object
-    var response = Object.assign({}, response); // shallow copy
-    delete response.device;
-
-    return response;
-}
-
 EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, (data) => {
     console.log('Device connected from address: ' + data.device.ipAddress);
     console.log("Sending: Get meter data");
@@ -32,7 +26,10 @@ EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, (data) => {
         .then(data => {
             for (const [ip, response] of Object.entries(data.responses)) {
                 console.log("Response from " + ip + ":");
-                console.log(parseGetMeterDataResponse(response));
+                
+                var resp = Object.assign({}, response); // shallow clone
+                delete resp.device; 
+                console.log(util.inspect(resp, false, null, true));
             }
         })
         .catch(err => {
