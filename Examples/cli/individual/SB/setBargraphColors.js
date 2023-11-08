@@ -2,8 +2,7 @@
 
 const {
     EmcbUDPbroadcastMaster,
-    EMCB_UDP_DEVICE_COLORS,
-    EMCB_UDP_EVENT_DEVICE_DISCOVERED
+    EMCB_UDP_EVENT_DEVICE_DISCOVERED,
 } = require('../../../..'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-master` module, replace with `require("emcb-udp-master")`
 
 const UDPKeys                = require("../../../_config.js")
@@ -18,12 +17,7 @@ var EMCBs = new EmcbUDPbroadcastMaster({
 const argv = require('minimist')(process.argv.slice(2));
 var deviceID = argv._[0];
 var deviceIP = argv._[1];
-var command = argv._[2];
-
-if (!EMCB_UDP_DEVICE_COLORS.includes(command)){
-    console.error("color is not in supported list: EMCB_UDP_DEVICE_COLORS");
-    process.exit()
-}
+var color = argv._[2];
 
 var device = EMCBs.createDevice(deviceID, deviceIP, true);
 
@@ -31,7 +25,7 @@ EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, (data) => {
     console.log('Device connected from address: ' + data.device.ipAddress);
     console.log("Sending: Set bargraph LEDs");
 
-    device.setBargraphLEDToUserDefinedColorName(command)
+    device.setBargraphLEDToUserDefinedColorName(color)
         .then(data => {
             for (const [ip, response] of Object.entries(data.responses)) {
                 console.log("Response from " + ip + ":");
