@@ -7,6 +7,8 @@ const {
 
 const UDPKeys = require("../../../_config.js")
 
+var parsers = require('./evseExampleParsers.js');
+
 var EMCBs = new EmcbUDPbroadcastMaster({
     broadcastUDPKey : UDPKeys.broadcast,
     unicastUDPKeys  : UDPKeys.unicast
@@ -19,13 +21,6 @@ var deviceIP = argv._[1];
 console.log("Establishing connection to device " + deviceID + " at ip: " + deviceIP);
 var device = EMCBs.createDevice(deviceID, deviceIP, true);
 
-function parsePatchEvseConfigSettingsAndModeResponse(response){
-    // clone the object
-    var response = Object.assign({}, response); // shallow copy
-    delete response.device;
-
-    return response;
-}
 
 EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, (data) => {
     console.log('Device connected from address: ' + data.device.ipAddress);
@@ -54,7 +49,7 @@ EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, (data) => {
     .then(data => {
         for (const [ip, response] of Object.entries(data.responses)) {
             console.log("Response from " + ip + ":");
-            console.log(parsePatchEvseConfigSettingsAndModeResponse(response));
+            console.log(parsers.parsePatchEvseConfigSettingsAndModeResponse(response));
         }
 
     })
