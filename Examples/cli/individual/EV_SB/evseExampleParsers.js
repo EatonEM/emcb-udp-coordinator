@@ -5,7 +5,6 @@ module.exports = {
         var response = Object.assign({}, response); // shallow copy
         response.errorData = [...response.errorData]; // shallow copy
         delete response.device;
-        delete response.raw;
     
         var states = {
             0 : "A: idle",
@@ -72,7 +71,6 @@ module.exports = {
         // clone the object
         var response = Object.assign({}, response); // shallow copy
         delete response.device;
-        delete response.raw;
     
         response.enabled = (response.enabled == 1 ? true : (response.enabled == 0 ? false : null));
         response.authorized = (response.authorized == 1 ? true : (response.authorized == 0 ? false : null));
@@ -94,7 +92,6 @@ module.exports = {
         var response = Object.assign({}, response); // shallow copy
         response.apiConfiguration = Object.assign({}, response.apiConfiguration); // shallow copy
         delete response.device;
-        delete response.raw;
     
         var modes = {
             1 : "no-restrictions", //Enabled and 100% charge rate, default out of the box mode
