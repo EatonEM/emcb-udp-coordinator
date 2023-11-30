@@ -882,13 +882,6 @@ EMCBs.on(EMCB_UDP_MESSAGE_CODE_GET_DEVICE_STATUS, data => {
     logger.info(chalk[data.device.chalkColor](`Received GET_DEVICE_STATUS response from ${data.device.ipAddress} with Device ID ${data.device.idDevice}`))
 })
 
-// Called whenever there is a response to a GET_DEVICE_DEBUG_DATA command
-EMCBs.on(EMCB_UDP_MESSAGE_CODE_GET_DEVICE_DEBUG_DATA, data => {
-    var device = data.device;
-    delete data.device;
-    logger.info(chalk[device.chalkColor](`Received GET_DEVICE_DEBUG_DATA response from ${device.ipAddress} with Device ID ${device.idDevice}. Data = ${util.inspect(data, {breakLength: Infinity})}`))
-})
-
 // Called whenever the breaker feedback position changes - could be from a GET_BREAKER_REMOTE_HANDLE_POSITION, GET_DEVICE_STATUS, or SET_BREAKER_REMOTE_HANDLE_POSITION command)
 EMCBs.on(EMCB_UDP_MESSAGE_CODE_GET_BREAKER_REMOTE_HANDLE_POSITION, function(data){
     logger.info(chalk[data.device.chalkColor](`Breaker Feedback Position changed from ${data.lastState} to ${data.state}`))
@@ -994,7 +987,6 @@ const {
 
     // Application Layer GET Message Codes
     EMCB_UDP_MESSAGE_CODE_GET_NEXT_SEQUENCE_NUMBER,
-    EMCB_UDP_MESSAGE_CODE_GET_DEVICE_DEBUG_DATA,
     EMCB_UDP_MESSAGE_CODE_GET_DEVICE_STATUS,
     EMCB_UDP_MESSAGE_CODE_GET_BREAKER_REMOTE_HANDLE_POSITION,
     EMCB_UDP_MESSAGE_CODE_GET_METER_TELEMETRY_DATA,
