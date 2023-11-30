@@ -1,5 +1,7 @@
 /*jshint esversion: 6 */
 
+// NOTE: This script will only work with Smart Breakers
+
 const {
     EmcbUDPbroadcastMaster,
     logger,
