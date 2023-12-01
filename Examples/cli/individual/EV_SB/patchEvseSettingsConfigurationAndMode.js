@@ -19,16 +19,17 @@ var deviceID = argv._[0];
 var deviceIP = argv._[1];
 
 console.log("Establishing connection to device " + deviceID + " at ip: " + deviceIP);
-var device = EMCBs.createDevice(deviceID, deviceIP, true);
+EMCBs.createDevice(deviceID, deviceIP, true);
 
 
 EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, (data) => {
-    console.log('Device connected from address: ' + data.device.ipAddress);
+    var device = data.device;
+    console.log('Device connected from address: ' + device.ipAddress);
     console.log("Sending: Set EVSE configuration settings and mode");
 
-    data.device.patchEvseConfigSettingsAndMode({
-        // NOTE: each value can be deleted or set to null to use the existing value on the device
-        // mode : null,
+    device.patchEvseConfigSettingsAndMode({
+        // NOTE: every key is optional, undefined values will not modify the existing value on the device
+        // mode : undefined,
         // mode : "no-restrictions",
         mode : "cloud-api",
         // mode: "charge-windows",
@@ -52,6 +53,21 @@ EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, (data) => {
             console.log(parsers.parsePatchEvseConfigSettingsAndModeResponse(response));
         }
 
+        // need a bit of extra time for the values to update on the device. 1s seems to work fine but I'll go with 2s for now to be safe
+        return new Promise(resolve => setTimeout(resolve, 2000));
+    })
+    .then(data => {
+        return device.getEvseConfigSettingsAndMode()
+                .then(data => {
+                    for (const [ip, response] of Object.entries(data.responses)) {
+                        console.log("Response from " + ip + ":");
+                        console.log(parsers.parseGetEvseConfigSettingsAndModeResponse(response));
+                    }
+                })
+                .catch(err => {
+                    console.error("Failed to get EVSE configuration settings and mode");
+                    console.error(err)
+                })
     })
     .catch(err => {
         console.error("Failed to set EVSE configuration settings and mode");
@@ -61,8 +77,3 @@ EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, (data) => {
         process.exit()
     })
 })
-
-
-
-
-    
