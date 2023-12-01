@@ -22,7 +22,7 @@
     - [getEvseAppliedControlSettings()](#getevseappliedcontrolsettings)
     - [getEvseDeviceState()](#getevsedevicestate)
     - [getEvseConfigSettingsAndMode()](#getevseconfigsettingsandmode)
-    - [patchEvseConfigSettingsAndMode()](#patchevseconfigsettingsandmode)
+    - [patchEvseConfigSettingsAndMode(options)](#patchevseconfigsettingsandmodeoptions)
   - [EmcbUDPdeviceMaster](#emcbudpdevicemaster)
     - [EmcbUDPdeviceMaster Properties](#emcbudpdevicemaster-properties)
   - [EventEmitter Cheat Sheet](#eventemitter-cheat-sheet)
@@ -808,7 +808,7 @@ for(var ipAddress in EMCBs.devices){
 
 ### getEvseAppliedControlSettings()
 
-Gets the currently applied EVSE control settings (`enabled`, `authorized`, `maxCurrentAmps`, `maxEnergyWatts`).
+Gets the currently applied EVSE control settings (`enabled`, `authorized`, `maxCurrentAmps`, `maxEnergyWatts`). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#currentlyAppliedSettings)
 
 - **RETURNS** `Promise` _(Object)_: A `promise` that resolves with the following
   data if there are any valid responses.  Otherwise it will throw the same data
@@ -819,8 +819,8 @@ Gets the currently applied EVSE control settings (`enabled`, `authorized`, `maxC
       - _`$IP_ADDRESS`_ _(Object)_:
         - `device` _(EmcbUDPdeviceMaster)_: The
           [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
-        - `enabled` _(Number)_: UInt8 code representing if charging is enabled (`0` for disabled, `1` for enabled, `255` for internal error).
-        - `authorized` _(Number)_: UInt8 code representing if charging is authorized (`0` for disabled, `1` for enabled, `255` for internal error).
+        - `enabled` _(Number)_: UInt8 code representing if charging is enabled (`0` for disabled, `1` for enabled, `255` for internal error). [More information here](https://portal.em.eaton.com/advancedTopics/evseStates#understandingEnabled)
+        - `authorized` _(Number)_: UInt8 code representing if charging is authorized (`0` for disabled, `1` for enabled, `255` for internal error). [More information here](https://portal.em.eaton.com/advancedTopics/evseStates#understandingAuthorized)
         - `maxCurrentAmps` _(Number)_: The maximum current as a UInt8 the EV is allowed to consume in Amps.
           (`0` for no configured limit (will use charger's max rating of 32Amps), `6` to `32` (inclusive) are valid current values)
         - `maxEnergyWatts` _(Number)_: The maximum energy as an Int32 the EV is allowed to consume in watts.
@@ -879,7 +879,7 @@ Gets the EVSE device state (`state`, `permanentError`, `errorCode`, `errorData`)
       - _`$IP_ADDRESS`_ _(Object)_:
         - `device` _(EmcbUDPdeviceMaster)_: The
           [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
-        - `state` _(Number)_: J1772 EVSE state as a UInt8, (`0` is "A", `1` is "B1", `2` is "B2", `3` is "C", `4` is "E", `5` is "F", `255` for internal error)[See state explanations here](https://portal.em.eaton.com/advancedTopics/evseStates#understandingEvseStates)
+        - `state` _(Number)_: J1772 EVSE state as a UInt8, (`0` is "A", `1` is "B1", `2` is "B2", `3` is "C", `4` is "E", `5` is "F", `255` for internal error) [See state explanations here](https://portal.em.eaton.com/advancedTopics/evseStates#understandingEvseStates)
         - `permanentError` _(Number)_: UInt8 code representing if EVSE has a permanent error (`0` for no, `1` for yes, `255` for internal error).,
         - `errorCode` _(Number)_: EVSE error code as a UInt8 [see error code list here](https://api.em.eaton.com/docs/emlcp.html#section/Smart-Breaker-Local-Communications-Protocol/Messages),
         - `errorData` _(Array)_: Array of 4 UInt16s that contain additional data relating to the error. This data is not currenly documented, but it can help Eaton technical support diagnose issues.
@@ -926,7 +926,124 @@ logEvseDeviceState()
 
 ### getEvseConfigSettingsAndMode()
 
-### patchEvseConfigSettingsAndMode()
+Gets the EVSE configuration settings and EVSE charge mode (`mode`, `offlineMode`, `apiConfiguration`). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration)
+
+- **RETURNS** `Promise` _(Object)_: A `promise` that resolves with the following
+  data if there are any valid responses.  Otherwise it will throw the same data
+  structure or an instance of an [`Error`](https://nodejs.org/api/errors.html).
+  - `data` _(Object)_:
+    - `responses` _(Object)_: Optional object that will contain parsed responses
+      by IP Address for valid responses
+      - _`$IP_ADDRESS`_ _(Object)_:
+        - `device` _(EmcbUDPdeviceMaster)_: The
+          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `mode` _(Number)_: UInt8 code representing the charge mode (`1` : "no-restrictions", `2` : "offline-no-restrictions", `3` : "manual-override", `4` : "cloud-api", `5` : "charge-windows", `6` : "api-override-enable", `7` : "api-override-disable", `8` : "ocpp",). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#modesAndConfigurations)
+        - `offlineMode` _(Number)_: UInt8 code representing the charging behavior when connection to the cloud is lost (`1` : "no-restrictions", `2` : "no-change"). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#configurationOfflineConfiguration)
+        - `apiConfiguration` _(Object)_: Object that contains the configuration settings to be used while `mode` is "cloud-api" [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#modeCloudApi)
+          - `enabled` _(Number)_: UInt8 code representing if charging is enabled (`0` for disabled, `1` for enabled, `255` for internal error). [More information here](https://portal.em.eaton.com/advancedTopics/evseStates#understandingEnabled)
+          - `maxCurrentAmps` _(Number)_: The maximum current as a UInt8 the EV is allowed to consume in Amps.
+          (`0` for no configured limit (will use charger's max rating of 32Amps), `6` to `32` (inclusive) are valid current values)
+          - `maxEnergyWatts` _(Number)_: The maximum energy as an Int32 the EV is allowed to consume in watts.
+          (`0` for no configured limit, `1` to `200000` (inclusive) are valid energy values)
+    - `errors` _(Object)_: Optional object that will contain
+      [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
+      additional `device` property, which is the relevant
+      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      encountered errors, excluding timeouts
+      - _`$IP_ADDRESS`_ _(Error)_:  An
+        [`Error`](https://nodejs.org/api/errors.html) object describing the
+        error.
+        - `device` _(EmcbUDPdeviceMaster)_: The
+          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+    - `timeouts` _(Object)_: Optional object that will contain
+      [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
+      additional `device` property, which is the relevant
+      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      timeouts
+      - _`$IP_ADDRESS`_ _(Error)_:  An
+        [`Error`](https://nodejs.org/api/errors.html) object describing the
+        timeout.
+        - `device` _(EmcbUDPdeviceMaster)_: The
+          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+
+> **NOTE** - If there are any valid responses, the return `Promise` will
+> resolve.  It will only reject in the event that **ALL** responses are errors
+> or timeouts.
+
+```javascript
+async function logEvseConfigSettingsAndMode(){
+    const settings = await EMCBs.getEvseConfigSettingsAndMode()
+
+    for(var ipAddress in settings.responses){
+        var response = settings.responses[ipAddress];
+        var device = response.device;
+        var stateString = "mode: " + response.mode + ", offlineMode: " + response.offlineMode + ", apiConfiguration: " + util.inspect(response.apiConfiguration);
+        console.log(chalk[device.chalkColor](device.idDevice + " EVSE configuration settings and mode:  " + stateString));
+    }
+}
+
+logEvseConfigSettingsAndMode()
+// 30000c2a69113173 EVSE device mode: 1, offlineMode: 1, apiConfiguration: { "enabled" : 1, "maxCurrentAmps" : 32, "maxEnergyWatts" : 0 }
+```
+
+### patchEvseConfigSettingsAndMode(options)
+
+Sets the EVSE configuration settings and EVSE charge mode (`mode`, `offlineMode`, `apiConfiguration`). Note: not available while in `OCPP` mode. [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration)
+
+- `options` _(Object)_: configuration object. All keys are optional and any `undefined` values will not modify the existing value on the device
+  - `mode` _(Number)_: UInt8 code representing the charge mode (`1` : "no-restrictions", `4` : "cloud-api", `5` : "charge-windows", `6` : "api-override-enable", `7` : "api-override-disable"). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#modesAndConfigurations)
+  - `offlineMode` _(Number)_: UInt8 code representing the charging behavior when connection to the cloud is lost (`1` : "no-restrictions", `2` : "no-change"). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#configurationOfflineConfiguration)
+  - `apiConfiguration` _(Object)_: Object that contains the configuration settings to be used while `mode` is "cloud-api" [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#modeCloudApi)
+    - `enabled` _(Number)_: UInt8 code representing if charging is enabled (`0` for disabled, `1` for enabled, `255` for internal error). [More information here](https://portal.em.eaton.com/advancedTopics/evseStates#understandingEnabled)
+    - `maxCurrentAmps` _(Number)_: The maximum current as a UInt8 the EV is allowed to consume in Amps.
+    (`0` for no configured limit (will use charger's max rating of 32Amps), `6` to `32` (inclusive) are valid current values)
+    - `maxEnergyWatts` _(Number)_: The maximum energy as an Int32 the EV is allowed to consume in watts.
+    (`0` for no configured limit, `1` to `200000` (inclusive) are valid energy values)
+- **RETURNS** `Promise` _(Object)_: A `promise` that resolves with the following data if **ALL** responses are valid.  Otherwise, it will throw the same data structure or an instance of an[`Error`](https://nodejs.org/api/errors.html).
+  - `data` _(Object)_:
+    - `responses` _(Object)_: Optional object that will contain parsed responses by IP Address for valid responses
+      - _`$IP_ADDRESS`_ _(Object)_:
+        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `ack` _(Number)_: UInt8 ACK code provided by the device.  A value of [EMCB_UDP_ACK](#EMCB_UDP_ACK) means the command was executed and the breaker confirmed it is in in desired state.  Any other value is a NACK.
+      - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any encountered errors, excluding timeouts
+      - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the error.
+        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any timeouts
+      - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the timeout.
+        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+
+> **NOTE** - The return `Promise` will resolve **ONLY** if all requests are
+> successful.  It will reject if **ANY** responses are errors or timeouts.
+
+```javascript
+for (var ipAddress in EMCBs.devices) {
+    var device = EMCBs.devices[ipAddress];
+
+    if (device.idDevice % 2 === 0) {
+        device.patchEvseConfigSettingsAndMode({
+            mode: "cloud-api",
+            offlineMode: "no-change",
+            apiConfiguration: {
+                enabled: true,
+                restrictions: {
+                    maxCurrent: 32,
+                    maxEnergy: 0
+                }
+            }
+        })
+    }
+    else {
+        device.patchEvseConfigSettingsAndMode({
+            apiConfiguration: {
+                restrictions: {
+                    maxCurrent: 16,
+                }
+            }
+        })
+    }
+}
+
+```
 
 ## EmcbUDPdeviceMaster
 
