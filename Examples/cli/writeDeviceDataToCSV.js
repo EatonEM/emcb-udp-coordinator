@@ -1,6 +1,12 @@
 // NOTE: This script will only work with Smart Breakers
 
 const {
+    discoverDevicesErrorLogger,
+    exitProcess,
+    logExceptionAndExitProcess
+} = require('./lib/shared')
+
+const {
 
     EmcbUDPbroadcastMaster,
     logger,
@@ -164,8 +170,7 @@ EMCBs.on(EMCB_UDP_EVENT_QUEUE_DRAINED, () => {
 
 })
 
-function discoverDevices(){
-
+function runExample(){
     EMCBs.discoverDevices()
         .then((devices) => {
             console.log("DISCOVER DEVICES COMPLETE - found " + Object.keys(devices).length + " EMCBs")
@@ -206,15 +211,13 @@ function discoverDevices(){
             }, 10050)    // The EMCB has a 10 second lockout timer between breaker control commands.  This ensures allows us to toggle at the max possible rate
         })
         .catch(err => {
-            console.error(err instanceof Error ? err.message : err)
+            discoverDevicesErrorLogger(err);
             logger.info("Retrying Device Discovery in 5 seconds")
             setTimeout(() => {
-                discoverDevices()
+                runExample()
             }, 5000)
         })
 }
-
-discoverDevices()
 
 process.on('SIGINT', function() {   //Ctrl + C
     try{
@@ -237,18 +240,19 @@ process.on('SIGINT', function() {   //Ctrl + C
             jsonWriteStreams[ipAddress].processor.end(() => {
                 ends++
 
-                if(ends === Object.keys(jsonWriteStreams).length)
-                    process.exit();
+                if(ends === Object.keys(jsonWriteStreams).length) {
+                    exitProcess();
+                }
             })
         }
 
-        if(Object.keys(jsonWriteStreams).length === 0)
-            process.exit();
+        if(Object.keys(jsonWriteStreams).length === 0) {
+            exitProcess();
+        }
 
     } catch(ex){
-        console.error("process.on SIGINT threw an error...")
-        console.error(ex);
-        process.exit();
+        logExceptionAndExitProcess();
     }
-
 });
+
+runExample();
