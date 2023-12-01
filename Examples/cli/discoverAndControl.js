@@ -1,4 +1,10 @@
 const {
+    discoverDevicesErrorLogger,
+    exitProcess,
+    logExceptionAndExitProcess
+} = require('./lib/shared')
+
+const {
     EmcbUDPbroadcastMaster,
     logger,
 
@@ -10,7 +16,6 @@ const {
 const UDPKeys                = require("../_config.js")
 
 const chalk                  = require('chalk');
-
 
 //Call this script with `$ node discoverAndControl.js open` as an example
 const validCommands = ["open", "close", "toggle"]
@@ -39,7 +44,7 @@ var EMCBs = new EmcbUDPbroadcastMaster({
     unicastUDPKeys  : UDPKeys.unicast
 })
 
-function discoverDevices(){
+function runExample(){
     EMCBs.discoverDevices()
         .then((devices) => {
             console.log("DISCOVER DEVICES COMPLETE - found " + Object.keys(devices).length + " EMCBs")
@@ -52,31 +57,32 @@ function discoverDevices(){
                 coloredDeviceArray.push(chalk[device.chalkColor](device.idDevice));
 
                 // Turn the bargraph to the same color as what we are logging for 10 seconds!
-                device.setBargraphLEDToUserDefinedColorName(device.chalkColor, 10, true)
+                device.setBargraphLEDToUserDefinedColorName(device.chalkColor, 10, true);
 
             }
 
-            console.log(coloredDeviceArray.join(chalk.white(",")))
+            console.log(coloredDeviceArray.join(chalk.white(",")));
 
             EMCBs.setBreakerState(command)
             .then(data => {
-                console.log("Toggled all breakers successfully!")
-                console.log(data)
+                console.log("Toggled all breakers successfully!");
+                console.log(data);
             })
             .catch(err => {
-                console.error("Unable to Toggle all breakers")
-                console.error(err)
+                console.error("Unable to Toggle all breakers");
+                console.error(err);
             })
             .then(() => {
-                process.exit()
+                exitProcess();
             })
         })
         .catch(err => {
-            logger.error(err)
-            logger.info("Retrying in 5 seconds")
+            discoverDevicesErrorLogger(err);
+            logger.info("Retrying Device Discovery in 5 seconds");
             setTimeout(() => {
-                discoverDevices()
+                runExample();
             }, 5000)
-        })
+    })
 }
-discoverDevices();
+
+runExample();
