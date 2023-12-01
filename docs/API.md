@@ -990,6 +990,8 @@ logEvseConfigSettingsAndMode()
 
 Sets the EVSE configuration settings and EVSE charge mode (`mode`, `offlineMode`, `apiConfiguration`). Note: not available while in `OCPP` mode. [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration)
 
+**Warning:** the device will wait until the new settings are applied before sending an ack. However it can take a bit longer for the internal state to update. This means that if you try to call `getEvseAppliedControlSettings()`, `getEvseDeviceState()`, or `getEvseConfigSettingsAndMode` immediently afterwards you may get older data. Currently the recommendation is to wait at least 2 seconds after receiving a reply before sending any of those commands to the same device. If you do not wait, it shouldn't cause any issues for the device, but it could confuse your program if not properly accounted for.
+
 - `options` _(Object)_: configuration object. All keys are optional and any `undefined` values will not modify the existing value on the device
   - `mode` _(Number)_: UInt8 code representing the charge mode (`1` : "no-restrictions", `4` : "cloud-api", `5` : "charge-windows", `6` : "api-override-enable", `7` : "api-override-disable"). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#modesAndConfigurations)
   - `offlineMode` _(Number)_: UInt8 code representing the charging behavior when connection to the cloud is lost (`1` : "no-restrictions", `2` : "no-change"). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#configurationOfflineConfiguration)
