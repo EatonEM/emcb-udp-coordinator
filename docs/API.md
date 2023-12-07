@@ -1,67 +1,76 @@
 # Table of Contents
 
-- [Class: EmcbUDPbroadcastMaster](#emcbudpbroadcastmaster)
-  - [Class Properties](#emcbudpbroadcastmaster-properties)
-  - [new EmcbUDPbroadcastMaster(args)](#new-emcbudpbroadcastmasterargs)
-  - [updateBroadcastUDPkey(key)](#updatebroadcastudpkeykey)
-  - [updateUnicastUDPkey(key)](#updateunicastudpkeyiddevice-key)
-  - [getMasterIPAddress()](#getMasterIPAddress)
-  - [getDevice(ipAddressOrIdDevice)](#getDeviceipaddressoriddevice)
-  - [discoverDevices([nonce])](#discoverdevicesnonce)
-  - [createDevice(idDevice, ipAddress, [unicastGetNextSequenceNumber])](#createDeviceidDevice-ipAddress-unicastGetNextSequenceNumber)
-  - [syncDeviceSequenceNumbers()](#syncdevicesequencenumbers)
-  - [getNextSequenceNumber([nonce])](#getnextsequencenumbernonce)
-  - [getBreakerRemoteHandlePosition()](#getbreakerremotehandleposition)
-  - [getMeterData()](#getmeterdata)
-  - [getDeviceStatus()](#getdevicestatus)
-  - [setNextSequenceNumber(desiredNextSequenceNumber)](#setnextsequencenumberdesirednextsequencenumber)
-  - [setBreakerState(desiredState[, maxAttempts])](#setbreakerstatedesiredstate-maxattempts)
-  - [setBargraphLEDToUserDefinedColor(enabled[, colorObj, blinking])](#setbargraphledtouserdefinedcolorenabled-colorobj-blinking)
-  - [setBargraphLEDToUserDefinedColorName(colorName[, duration, blinking])](#setbargraphledtouserdefinedcolornamecolorname-duration-blinking)
-- [Class: EmcbUDPdeviceMaster](#emcbudpdevicemaster)
-  - [Class Properties](#emcbudpdevicemaster-properties)
-- [EventEmitter Cheat Sheet](#eventemitter-cheat-sheet)
-- [Class: logger](#logger)
-- [Constants](#constants)
-  - [Network Configuration](#network-configuration)
-    - [EMCB_UDP_PORT](#EMCB_UDP_PORT)
-  - [EMCB UDP Application Layer](#emcb-udp-application-layer)
-    - [EMCB_UDP_IMPLEMENTED_PROTOCOL_VERSION](#EMCB_UDP_IMPLEMENTED_PROTOCOL_VERSION)
-    - [EMCB_UDP_MESSAGE_THROTTLE_TIME_MS](#EMCB_UDP_MESSAGE_THROTTLE_TIME_MS)
-    - [EMCB_UDP_LONGEST_IMPLEMENTED_MESSAGE_LENGTH](#EMCB_UDP_LONGEST_IMPLEMENTED_MESSAGE_LENGTH)
-    - [Header](#emcb-udp-application-layer-header)
-      - [EMCB_UDP_HEADER_START_MASTER](#EMCB_UDP_HEADER_START_MASTER)
-      - [EMCB_UDP_HEADER_START_SLAVE](#EMCB_UDP_HEADER_START_SLAVE)
+- [Table of Contents](#table-of-contents)
+  - [EmcbUDPbroadcastMaster](#emcbudpbroadcastmaster)
+    - [EmcbUDPbroadcastMaster Properties](#emcbudpbroadcastmaster-properties)
+    - [new EmcbUDPbroadcastMaster(args)](#new-emcbudpbroadcastmasterargs)
+    - [updateBroadcastUDPkey(key)](#updatebroadcastudpkeykey)
+    - [updateUnicastUDPkey(idDevice, key)](#updateunicastudpkeyiddevice-key)
+    - [getMasterIPAddress()](#getmasteripaddress)
+    - [getDevice(ipAddressOrIdDevice)](#getdeviceipaddressoriddevice)
+    - [discoverDevices(\[nonce\])](#discoverdevicesnonce)
+  - [createDevice(idDevice, ipAddress, \[unicastGetNextSequenceNumber\])\]](#createdeviceiddevice-ipaddress-unicastgetnextsequencenumber)
+    - [syncDeviceSequenceNumbers()](#syncdevicesequencenumbers)
+    - [getNextSequenceNumber(\[nonce\])](#getnextsequencenumbernonce)
+    - [getBreakerRemoteHandlePosition()](#getbreakerremotehandleposition)
+    - [getMeterData()](#getmeterdata)
+    - [getDeviceStatus()](#getdevicestatus)
+    - [setNextSequenceNumber(desiredNextSequenceNumber)](#setnextsequencenumberdesirednextsequencenumber)
+    - [setBreakerState(desiredState\[, maxAttempts\])](#setbreakerstatedesiredstate-maxattempts)
+    - [setBargraphLEDToUserDefinedColor(enabled\[, colorObj, blinking\])](#setbargraphledtouserdefinedcolorenabled-colorobj-blinking)
+    - [setBargraphLEDToUserDefinedColorName(colorName\[, duration, blinking\])](#setbargraphledtouserdefinedcolornamecolorname-duration-blinking)
+    - [getEvseAppliedControlSettings()](#getevseappliedcontrolsettings)
+    - [getEvseDeviceState()](#getevsedevicestate)
+    - [getEvseConfigSettingsAndMode()](#getevseconfigsettingsandmode)
+    - [patchEvseConfigSettingsAndMode(options)](#patchevseconfigsettingsandmodeoptions)
+  - [EmcbUDPdeviceMaster](#emcbudpdevicemaster)
+    - [EmcbUDPdeviceMaster Properties](#emcbudpdevicemaster-properties)
+  - [EventEmitter Cheat Sheet](#eventemitter-cheat-sheet)
+  - [logger](#logger)
+  - [Constants](#constants)
+    - [Network Configuration](#network-configuration)
+      - [EMCB\_UDP\_PORT](#emcb_udp_port)
+    - [EMCB UDP Application Layer](#emcb-udp-application-layer)
+      - [EMCB\_UDP\_IMPLEMENTED\_PROTOCOL\_VERSION](#emcb_udp_implemented_protocol_version)
+      - [EMCB\_UDP\_MESSAGE\_THROTTLE\_TIME\_MS](#emcb_udp_message_throttle_time_ms)
+      - [EMCB\_UDP\_LONGEST\_IMPLEMENTED\_MESSAGE\_LENGTH](#emcb_udp_longest_implemented_message_length)
+    - [EMCB UDP Application Layer Header](#emcb-udp-application-layer-header)
+      - [EMCB\_UDP\_HEADER\_START\_MASTER](#emcb_udp_header_start_master)
+      - [EMCB\_UDP\_HEADER\_START\_SLAVE](#emcb_udp_header_start_slave)
     - [Message Codes](#message-codes)
-      - [GET Message Codes](#get-message-codes)
-        - [EMCB_UDP_MESSAGE_CODE_GET_NEXT_SEQUENCE_NUMBER](#EMCB_UDP_MESSAGE_CODE_GET_NEXT_SEQUENCE_NUMBER)
-        - [EMCB_UDP_MESSAGE_CODE_GET_DEVICE_STATUS](#EMCB_UDP_MESSAGE_CODE_GET_DEVICE_STATUS)
-        - [EMCB_UDP_MESSAGE_CODE_GET_BREAKER_REMOTE_HANDLE_POSITION](#EMCB_UDP_MESSAGE_CODE_GET_BREAKER_REMOTE_HANDLE_POSITION)
-        - [EMCB_UDP_MESSAGE_CODE_GET_METER_TELEMETRY_DATA](#EMCB_UDP_MESSAGE_CODE_GET_METER_TELEMETRY_DATA)
-      - [SET Message Codes](#set-message-codes)
-        - [EMCB_UDP_MESSAGE_CODE_SET_NEXT_SEQUENCE_NUMBER](#EMCB_UDP_MESSAGE_CODE_SET_NEXT_SEQUENCE_NUMBER)
-        - [EMCB_UDP_MESSAGE_CODE_SET_BREAKER_REMOTE_HANDLE_POSITION](#EMCB_UDP_MESSAGE_CODE_SET_BREAKER_REMOTE_HANDLE_POSITION)
-        - [EMCB_UDP_MESSAGE_CODE_SET_BARGRAPH_LED_TO_USER_DEFINED](#EMCB_UDP_MESSAGE_CODE_SET_BARGRAPH_LED_TO_USER_DEFINED)
-      - [EMCB_UDP_MESSAGE_CODES](#EMCB_UDP_MESSAGE_CODES)
-  - [Enums and Parsed Data](#enums-and-parsed-data)
-    - [EMCB_UDP_ACK](#EMCB_UDP_ACK)
-    - [EMCB_UDP_SET_NEXT_SEQUENCE_NUMBER_RATE_LIMITED](#EMCB_UDP_SET_NEXT_SEQUENCE_NUMBER_RATE_LIMITED)
-    - [EMCB_UDP_SET_NEXT_SEQUENCE_NUMBER_BAD_SEQUENCE_NUMBER](#EMCB_UDP_SET_NEXT_SEQUENCE_NUMBER_BAD_SEQUENCE_NUMBER)
-    - [EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN](#EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN)
-    - [EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED](#EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED)
-    - [EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_FEEDBACK_MISMATCH](#EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_FEEDBACK_MISMATCH)
-    - [EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE](#EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE)
-  - [Events](#events)
-    - [EMCB_UDP_EVENT_QUEUE_DRAINED](#EMCB_UDP_EVENT_QUEUE_DRAINED)
-    - [EMCB_UDP_EVENT_DEVICE_DISCOVERED](#EMCB_UDP_EVENT_DEVICE_DISCOVERED)
-    - [EMCB_UDP_EVENT_DEVICE_REMOVED](#EMCB_UDP_EVENT_DEVICE_REMOVED)
-    - [EMCB_UDP_EVENT_DEVICE_IP_ADDRESS_CHANGED](#EMCB_UDP_EVENT_DEVICE_IP_ADDRESS_CHANGED)
-  - [Errors](#errors)
-    - [EMCB_UDP_ERROR_TIMEOUT](#EMCB_UDP_ERROR_TIMEOUT)
-    - [EMCB_UDP_EVENT_PARSER_ERROR](#EMCB_UDP_EVENT_PARSER_ERROR)
-    - [EMCB_UDP_ERROR_INVALID_DATA_LENGTH](#EMCB_UDP_ERROR_INVALID_DATA_LENGTH)
-  - [Others](#others)
-    - [EMCB_UDP_DEVICE_COLORS](#EMCB_UDP_DEVICE_COLORS)
+    - [GET Message Codes](#get-message-codes)
+      - [EMCB\_UDP\_MESSAGE\_CODE\_GET\_NEXT\_SEQUENCE\_NUMBER](#emcb_udp_message_code_get_next_sequence_number)
+      - [EMCB\_UDP\_MESSAGE\_CODE\_GET\_DEVICE\_STATUS](#emcb_udp_message_code_get_device_status)
+      - [EMCB\_UDP\_MESSAGE\_CODE\_GET\_BREAKER\_REMOTE\_HANDLE\_POSITION](#emcb_udp_message_code_get_breaker_remote_handle_position)
+      - [EMCB\_UDP\_MESSAGE\_CODE\_GET\_METER\_TELEMETRY\_DATA](#emcb_udp_message_code_get_meter_telemetry_data)
+      - [EMCB\_UDP\_MESSAGE\_CODE\_GET\_EVSE\_APPLIED\_CONTROL\_SETTINGS](#emcb_udp_message_code_get_evse_applied_control_settings)
+      - [EMCB\_UDP\_MESSAGE\_CODE\_GET\_EVSE\_DEVICE\_STATE](#emcb_udp_message_code_get_evse_device_state)
+      - [EMCB\_UDP\_MESSAGE\_CODE\_GET\_EVSE\_CONFIG\_SETTINGS](#emcb_udp_message_code_get_evse_config_settings)
+    - [SET Message Codes](#set-message-codes)
+      - [EMCB\_UDP\_MESSAGE\_CODE\_SET\_NEXT\_SEQUENCE\_NUMBER](#emcb_udp_message_code_set_next_sequence_number)
+      - [EMCB\_UDP\_MESSAGE\_CODE\_SET\_BREAKER\_REMOTE\_HANDLE\_POSITION](#emcb_udp_message_code_set_breaker_remote_handle_position)
+      - [EMCB\_UDP\_MESSAGE\_CODE\_SET\_BARGRAPH\_LED\_TO\_USER\_DEFINED](#emcb_udp_message_code_set_bargraph_led_to_user_defined)
+      - [EMCB\_UDP\_MESSAGE\_CODE\_SET\_EVSE\_CONFIG\_SETTINGS](#emcb_udp_message_code_set_evse_config_settings)
+      - [EMCB\_UDP\_MESSAGE\_CODES](#emcb_udp_message_codes)
+    - [Enums and Parsed Data](#enums-and-parsed-data)
+      - [EMCB\_UDP\_ACK](#emcb_udp_ack)
+      - [EMCB\_UDP\_SET\_NEXT\_SEQUENCE\_NUMBER\_RATE\_LIMITED](#emcb_udp_set_next_sequence_number_rate_limited)
+      - [EMCB\_UDP\_SET\_NEXT\_SEQUENCE\_NUMBER\_BAD\_SEQUENCE\_NUMBER](#emcb_udp_set_next_sequence_number_bad_sequence_number)
+      - [EMCB\_UDP\_BREAKER\_REMOTE\_HANDLE\_POSITION\_OPEN](#emcb_udp_breaker_remote_handle_position_open)
+      - [EMCB\_UDP\_BREAKER\_REMOTE\_HANDLE\_POSITION\_CLOSED](#emcb_udp_breaker_remote_handle_position_closed)
+      - [EMCB\_UDP\_BREAKER\_REMOTE\_HANDLE\_POSITION\_FEEDBACK\_MISMATCH](#emcb_udp_breaker_remote_handle_position_feedback_mismatch)
+      - [EMCB\_UDP\_BREAKER\_REMOTE\_HANDLE\_POSITION\_TOGGLE](#emcb_udp_breaker_remote_handle_position_toggle)
+    - [Events](#events)
+      - [EMCB\_UDP\_EVENT\_QUEUE\_DRAINED](#emcb_udp_event_queue_drained)
+      - [EMCB\_UDP\_EVENT\_DEVICE\_DISCOVERED](#emcb_udp_event_device_discovered)
+      - [EMCB\_UDP\_EVENT\_DEVICE\_REMOVED](#emcb_udp_event_device_removed)
+      - [EMCB\_UDP\_EVENT\_DEVICE\_IP\_ADDRESS\_CHANGED](#emcb_udp_event_device_ip_address_changed)
+    - [Errors](#errors)
+      - [EMCB\_UDP\_ERROR\_TIMEOUT](#emcb_udp_error_timeout)
+      - [EMCB\_UDP\_EVENT\_PARSER\_ERROR](#emcb_udp_event_parser_error)
+      - [EMCB\_UDP\_ERROR\_INVALID\_DATA\_LENGTH](#emcb_udp_error_invalid_data_length)
+    - [Others](#others)
+      - [EMCB\_UDP\_DEVICE\_COLORS](#emcb_udp_device_colors)
 
 ## EmcbUDPbroadcastMaster
 
@@ -797,6 +806,247 @@ for(var ipAddress in EMCBs.devices){
 }
 ```
 
+### getEvseAppliedControlSettings()
+
+Gets the currently applied EVSE control settings (`enabled`, `authorized`, `maxCurrentAmps`, `maxEnergyWatts`). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#currentlyAppliedSettings)
+
+- **RETURNS** `Promise` _(Object)_: A `promise` that resolves with the following
+  data if there are any valid responses.  Otherwise it will throw the same data
+  structure or an instance of an [`Error`](https://nodejs.org/api/errors.html).
+  - `data` _(Object)_:
+    - `responses` _(Object)_: Optional object that will contain parsed responses
+      by IP Address for valid responses
+      - _`$IP_ADDRESS`_ _(Object)_:
+        - `device` _(EmcbUDPdeviceMaster)_: The
+          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `enabled` _(Number)_: UInt8 code representing if charging is enabled (`0` for disabled, `1` for enabled, `255` for internal error). [More information here](https://portal.em.eaton.com/advancedTopics/evseStates#understandingEnabled)
+        - `authorized` _(Number)_: UInt8 code representing if charging is authorized (`0` for disabled, `1` for enabled, `255` for internal error). [More information here](https://portal.em.eaton.com/advancedTopics/evseStates#understandingAuthorized)
+        - `maxCurrentAmps` _(Number)_: The maximum current as a UInt8 the EV is allowed to consume in Amps.
+          (`0` for no configured limit (will use charger's max rating of 32Amps), `6` to `32` (inclusive) are valid current values)
+        - `maxEnergyWatts` _(Number)_: The maximum energy as an Int32 the EV is allowed to consume in watts.
+          (`0` for no configured limit, `1` to `200000` (inclusive) are valid energy values)
+    - `errors` _(Object)_: Optional object that will contain
+      [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
+      additional `device` property, which is the relevant
+      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      encountered errors, excluding timeouts
+      - _`$IP_ADDRESS`_ _(Error)_:  An
+        [`Error`](https://nodejs.org/api/errors.html) object describing the
+        error.
+        - `device` _(EmcbUDPdeviceMaster)_: The
+          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+    - `timeouts` _(Object)_: Optional object that will contain
+      [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
+      additional `device` property, which is the relevant
+      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      timeouts
+      - _`$IP_ADDRESS`_ _(Error)_:  An
+        [`Error`](https://nodejs.org/api/errors.html) object describing the
+        timeout.
+        - `device` _(EmcbUDPdeviceMaster)_: The
+          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+
+> **NOTE** - If there are any valid responses, the return `Promise` will
+> resolve.  It will only reject in the event that **ALL** responses are errors
+> or timeouts.
+
+```javascript
+async function logCurrentlyAppliedEvseControlSettings(){
+    const controlSettings = await EMCBs.getEvseAppliedControlSettings()
+
+    for(var ipAddress in controlSettings.responses){
+        var response = controlSettings.responses[ipAddress];
+        var device = response.device;
+        var settingsString = "enabled: " + response.enabled + ", authorized: " + response.authorized + ", maxCurrentAmps: " + response.maxCurrentAmps + ", maxEnergyWatts: " + response.maxEnergyWatts;
+        console.log(chalk[device.chalkColor](device.idDevice + " EVSE control settings:  " + settingsString));
+    }
+}
+
+logCurrentlyAppliedEvseControlSettings()
+// 30000c2a69113173 EVSE control settings:  enabled: 1, authorized: 1, maxCurrentAmps: 32, maxEnergyWatts: 0
+```
+
+### getEvseDeviceState()
+
+Gets the EVSE device state (`state`, `permanentError`, `errorCode`, `errorData`).
+
+- **RETURNS** `Promise` _(Object)_: A `promise` that resolves with the following
+  data if there are any valid responses.  Otherwise it will throw the same data
+  structure or an instance of an [`Error`](https://nodejs.org/api/errors.html).
+  - `data` _(Object)_:
+    - `responses` _(Object)_: Optional object that will contain parsed responses
+      by IP Address for valid responses
+      - _`$IP_ADDRESS`_ _(Object)_:
+        - `device` _(EmcbUDPdeviceMaster)_: The
+          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `state` _(Number)_: J1772 EVSE state as a UInt8, (`0` is "A", `1` is "B1", `2` is "B2", `3` is "C", `4` is "E", `5` is "F", `255` for internal error) [See state explanations here](https://portal.em.eaton.com/advancedTopics/evseStates#understandingEvseStates)
+        - `permanentError` _(Number)_: UInt8 code representing if EVSE has a permanent error (`0` for no, `1` for yes, `255` for internal error).,
+        - `errorCode` _(Number)_: EVSE error code as a UInt8 [see error code list here](https://api.em.eaton.com/docs/emlcp.html#section/Smart-Breaker-Local-Communications-Protocol/Messages),
+        - `errorData` _(Array)_: Array of 4 UInt16s that contain additional data relating to the error. This data is not currenly documented, but it can help Eaton technical support diagnose issues.
+    - `errors` _(Object)_: Optional object that will contain
+      [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
+      additional `device` property, which is the relevant
+      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      encountered errors, excluding timeouts
+      - _`$IP_ADDRESS`_ _(Error)_:  An
+        [`Error`](https://nodejs.org/api/errors.html) object describing the
+        error.
+        - `device` _(EmcbUDPdeviceMaster)_: The
+          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+    - `timeouts` _(Object)_: Optional object that will contain
+      [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
+      additional `device` property, which is the relevant
+      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      timeouts
+      - _`$IP_ADDRESS`_ _(Error)_:  An
+        [`Error`](https://nodejs.org/api/errors.html) object describing the
+        timeout.
+        - `device` _(EmcbUDPdeviceMaster)_: The
+          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+
+> **NOTE** - If there are any valid responses, the return `Promise` will
+> resolve.  It will only reject in the event that **ALL** responses are errors
+> or timeouts.
+
+```javascript
+async function logEvseDeviceState(){
+    const deviceState = await EMCBs.getEvseDeviceState()
+
+    for(var ipAddress in deviceState.responses){
+        var response = deviceState.responses[ipAddress];
+        var device = response.device;
+        var stateString = "state: " + response.state + ", permanentError: " + response.permanentError + ", errorCode: " + response.errorCode + ", errorData: " + util.inspect(response.errorData);
+        console.log(chalk[device.chalkColor](device.idDevice + " EVSE device state:  " + stateString));
+    }
+}
+
+logEvseDeviceState()
+// 30000c2a69113173 EVSE device state:  enabled: 3, permanentError: 0, errorCode: 0, errorData: [0,0,0,0]
+```
+
+### getEvseConfigSettingsAndMode()
+
+Gets the EVSE configuration settings and EVSE charge mode (`mode`, `offlineMode`, `apiConfiguration`). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration)
+
+- **RETURNS** `Promise` _(Object)_: A `promise` that resolves with the following
+  data if there are any valid responses.  Otherwise it will throw the same data
+  structure or an instance of an [`Error`](https://nodejs.org/api/errors.html).
+  - `data` _(Object)_:
+    - `responses` _(Object)_: Optional object that will contain parsed responses
+      by IP Address for valid responses
+      - _`$IP_ADDRESS`_ _(Object)_:
+        - `device` _(EmcbUDPdeviceMaster)_: The
+          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `mode` _(Number)_: UInt8 code representing the charge mode (`1` : "no-restrictions", `2` : "offline-no-restrictions", `3` : "manual-override", `4` : "cloud-api", `5` : "charge-windows", `6` : "api-override-enable", `7` : "api-override-disable", `8` : "ocpp",). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#modesAndConfigurations)
+        - `offlineMode` _(Number)_: UInt8 code representing the charging behavior when connection to the cloud is lost (`1` : "no-restrictions", `2` : "no-change"). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#configurationOfflineConfiguration)
+        - `apiConfiguration` _(Object)_: Object that contains the configuration settings to be used while `mode` is "cloud-api" [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#modeCloudApi)
+          - `enabled` _(Number)_: UInt8 code representing if charging is enabled (`0` for disabled, `1` for enabled, `255` for internal error). [More information here](https://portal.em.eaton.com/advancedTopics/evseStates#understandingEnabled)
+          - `maxCurrentAmps` _(Number)_: The maximum current as a UInt8 the EV is allowed to consume in Amps.
+          (`0` for no configured limit (will use charger's max rating of 32Amps), `6` to `32` (inclusive) are valid current values)
+          - `maxEnergyWatts` _(Number)_: The maximum energy as an Int32 the EV is allowed to consume in watts.
+          (`0` for no configured limit, `1` to `200000` (inclusive) are valid energy values)
+    - `errors` _(Object)_: Optional object that will contain
+      [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
+      additional `device` property, which is the relevant
+      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      encountered errors, excluding timeouts
+      - _`$IP_ADDRESS`_ _(Error)_:  An
+        [`Error`](https://nodejs.org/api/errors.html) object describing the
+        error.
+        - `device` _(EmcbUDPdeviceMaster)_: The
+          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+    - `timeouts` _(Object)_: Optional object that will contain
+      [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
+      additional `device` property, which is the relevant
+      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      timeouts
+      - _`$IP_ADDRESS`_ _(Error)_:  An
+        [`Error`](https://nodejs.org/api/errors.html) object describing the
+        timeout.
+        - `device` _(EmcbUDPdeviceMaster)_: The
+          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+
+> **NOTE** - If there are any valid responses, the return `Promise` will
+> resolve.  It will only reject in the event that **ALL** responses are errors
+> or timeouts.
+
+```javascript
+async function logEvseConfigSettingsAndMode(){
+    const settings = await EMCBs.getEvseConfigSettingsAndMode()
+
+    for(var ipAddress in settings.responses){
+        var response = settings.responses[ipAddress];
+        var device = response.device;
+        var stateString = "mode: " + response.mode + ", offlineMode: " + response.offlineMode + ", apiConfiguration: " + util.inspect(response.apiConfiguration);
+        console.log(chalk[device.chalkColor](device.idDevice + " EVSE configuration settings and mode:  " + stateString));
+    }
+}
+
+logEvseConfigSettingsAndMode()
+// 30000c2a69113173 EVSE device mode: 1, offlineMode: 1, apiConfiguration: { "enabled" : 1, "maxCurrentAmps" : 32, "maxEnergyWatts" : 0 }
+```
+
+### patchEvseConfigSettingsAndMode(options)
+
+Sets the EVSE configuration settings and EVSE charge mode (`mode`, `offlineMode`, `apiConfiguration`). Note: not available while in `OCPP` mode. [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration)
+
+**Warning:** the device will wait until the new settings are applied before sending an ack. However it can take a bit longer for the internal state to update. This means that if you try to call `getEvseAppliedControlSettings()`, `getEvseDeviceState()`, or `getEvseConfigSettingsAndMode` immediently afterwards you may get older data. Currently the recommendation is to wait at least 2 seconds after receiving a reply before sending any of those commands to the same device. If you do not wait, it shouldn't cause any issues for the device, but it could confuse your program if not properly accounted for.
+
+- `options` _(Object)_: configuration object. All keys are optional and any `undefined` values will not modify the existing value on the device
+  - `mode` _(Number)_: UInt8 code representing the charge mode (`1` : "no-restrictions", `4` : "cloud-api", `5` : "charge-windows", `6` : "api-override-enable", `7` : "api-override-disable"). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#modesAndConfigurations)
+  - `offlineMode` _(Number)_: UInt8 code representing the charging behavior when connection to the cloud is lost (`1` : "no-restrictions", `2` : "no-change"). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#configurationOfflineConfiguration)
+  - `apiConfiguration` _(Object)_: Object that contains the configuration settings to be used while `mode` is "cloud-api" [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#modeCloudApi)
+    - `enabled` _(Number)_: UInt8 code representing if charging is enabled (`0` for disabled, `1` for enabled, `255` for internal error). [More information here](https://portal.em.eaton.com/advancedTopics/evseStates#understandingEnabled)
+    - `maxCurrentAmps` _(Number)_: The maximum current as a UInt8 the EV is allowed to consume in Amps.
+    (`0` for no configured limit (will use charger's max rating of 32Amps), `6` to `32` (inclusive) are valid current values)
+    - `maxEnergyWatts` _(Number)_: The maximum energy as an Int32 the EV is allowed to consume in watts.
+    (`0` for no configured limit, `1` to `200000` (inclusive) are valid energy values)
+- **RETURNS** `Promise` _(Object)_: A `promise` that resolves with the following data if **ALL** responses are valid.  Otherwise, it will throw the same data structure or an instance of an[`Error`](https://nodejs.org/api/errors.html).
+  - `data` _(Object)_:
+    - `responses` _(Object)_: Optional object that will contain parsed responses by IP Address for valid responses
+      - _`$IP_ADDRESS`_ _(Object)_:
+        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `ack` _(Number)_: UInt8 ACK code provided by the device.  A value of [EMCB_UDP_ACK](#EMCB_UDP_ACK) means the command was executed and the breaker confirmed it is in in desired state.  Any other value is a NACK.
+      - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any encountered errors, excluding timeouts
+      - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the error.
+        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any timeouts
+      - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the timeout.
+        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+
+> **NOTE** - The return `Promise` will resolve **ONLY** if all requests are
+> successful.  It will reject if **ANY** responses are errors or timeouts.
+
+```javascript
+for (var ipAddress in EMCBs.devices) {
+    var device = EMCBs.devices[ipAddress];
+
+    if (device.idDevice % 2 === 0) {
+        device.patchEvseConfigSettingsAndMode({
+            mode: "cloud-api",
+            offlineMode: "no-change",
+            apiConfiguration: {
+                enabled: true,
+                restrictions: {
+                    maxCurrent: 32,
+                    maxEnergy: 0
+                }
+            }
+        })
+    }
+    else {
+        device.patchEvseConfigSettingsAndMode({
+            apiConfiguration: {
+                restrictions: {
+                    maxCurrent: 16,
+                }
+            }
+        })
+    }
+}
+
+```
+
 ## EmcbUDPdeviceMaster
 
 The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) exposes the same functionality
@@ -880,13 +1130,6 @@ EMCBs.on(EMCB_UDP_MESSAGE_CODE_GET_NEXT_SEQUENCE_NUMBER, data => {
 // Called whenever there is a response to a GET_DEVICE_STATUS command that contains fresh data
 EMCBs.on(EMCB_UDP_MESSAGE_CODE_GET_DEVICE_STATUS, data => {
     logger.info(chalk[data.device.chalkColor](`Received GET_DEVICE_STATUS response from ${data.device.ipAddress} with Device ID ${data.device.idDevice}`))
-})
-
-// Called whenever there is a response to a GET_DEVICE_DEBUG_DATA command
-EMCBs.on(EMCB_UDP_MESSAGE_CODE_GET_DEVICE_DEBUG_DATA, data => {
-    var device = data.device;
-    delete data.device;
-    logger.info(chalk[device.chalkColor](`Received GET_DEVICE_DEBUG_DATA response from ${device.ipAddress} with Device ID ${device.idDevice}. Data = ${util.inspect(data, {breakLength: Infinity})}`))
 })
 
 // Called whenever the breaker feedback position changes - could be from a GET_BREAKER_REMOTE_HANDLE_POSITION, GET_DEVICE_STATUS, or SET_BREAKER_REMOTE_HANDLE_POSITION command)
@@ -994,15 +1237,18 @@ const {
 
     // Application Layer GET Message Codes
     EMCB_UDP_MESSAGE_CODE_GET_NEXT_SEQUENCE_NUMBER,
-    EMCB_UDP_MESSAGE_CODE_GET_DEVICE_DEBUG_DATA,
     EMCB_UDP_MESSAGE_CODE_GET_DEVICE_STATUS,
     EMCB_UDP_MESSAGE_CODE_GET_BREAKER_REMOTE_HANDLE_POSITION,
     EMCB_UDP_MESSAGE_CODE_GET_METER_TELEMETRY_DATA,
+    EMCB_UDP_MESSAGE_CODE_GET_EVSE_APPLIED_CONTROL_SETTINGS,
+    EMCB_UDP_MESSAGE_CODE_GET_EVSE_DEVICE_STATE,
+    EMCB_UDP_MESSAGE_CODE_GET_EVSE_CONFIG_SETTINGS
 
     // Application Layer SET Message Codes
     EMCB_UDP_MESSAGE_CODE_SET_NEXT_SEQUENCE_NUMBER,
     EMCB_UDP_MESSAGE_CODE_SET_BREAKER_REMOTE_HANDLE_POSITION,
     EMCB_UDP_MESSAGE_CODE_SET_BARGRAPH_LED_TO_USER_DEFINED,
+    EMCB_UDP_MESSAGE_CODE_SET_EVSE_CONFIG_SETTINGS,
 
     // Application Layer Integer Message Codes to strings
     EMCB_UDP_MESSAGE_CODES,
@@ -1083,14 +1329,14 @@ Start Byte of all Slave->Master responses
 The integer message code for the GET_NEXT_SEQUENCE_NUMBER command.  This
 constant will also be emitted by the
 [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) whenever a response to the
+[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) whenever a response to the
 command is successfully parsed.
 
 #### EMCB_UDP_MESSAGE_CODE_GET_DEVICE_STATUS
 
 The integer message code for the GET_DEVICE_STATUS command.  This constant will
 also be emitted by the [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) whenever a response to the
+[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) whenever a response to the
 command is successfully parsed.
 
 #### EMCB_UDP_MESSAGE_CODE_GET_BREAKER_REMOTE_HANDLE_POSITION
@@ -1098,7 +1344,7 @@ command is successfully parsed.
 The integer message code for the GET_BREAKER_REMOTE_HANDLE_POSITION command.
 This constant will also be emitted by the
 [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) whenever a response to the
+[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) whenever a response to the
 command is successfully parsed.
 
 #### EMCB_UDP_MESSAGE_CODE_GET_METER_TELEMETRY_DATA
@@ -1106,8 +1352,20 @@ command is successfully parsed.
 The integer message code for the GET_METER_TELEMETRY_DATA command.  This
 constant will also be emitted by the
 [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) whenever a response to the
+[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) whenever a response to the
 command is successfully parsed.
+
+#### EMCB_UDP_MESSAGE_CODE_GET_EVSE_APPLIED_CONTROL_SETTINGS
+
+The integer message code for the EMCB_UDP_MESSAGE_CODE_GET_EVSE_APPLIED_CONTROL_SETTINGS command. Event emitting is not yet supported.
+
+#### EMCB_UDP_MESSAGE_CODE_GET_EVSE_DEVICE_STATE
+
+The integer message code for the EMCB_UDP_MESSAGE_CODE_GET_EVSE_DEVICE_STATE command. Event emitting is not yet supported.
+
+#### EMCB_UDP_MESSAGE_CODE_GET_EVSE_CONFIG_SETTINGS
+
+The integer message code for the EMCB_UDP_MESSAGE_CODE_GET_EVSE_CONFIG_SETTINGS command. Event emitting is not yet supported.
 
 ### SET Message Codes
 
@@ -1116,7 +1374,7 @@ command is successfully parsed.
 The integer message code for the SET_NEXT_SEQUENCE_NUMBER command.  This
 constant will also be emitted by the
 [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) whenever a response to the
+[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) whenever a response to the
 command is successfully parsed.
 
 #### EMCB_UDP_MESSAGE_CODE_SET_BREAKER_REMOTE_HANDLE_POSITION
@@ -1124,7 +1382,7 @@ command is successfully parsed.
 The integer message code for the SET_BREAKER_REMOTE_HANDLE_POSITION command.
 This constant will also be emitted by the
 [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) whenever a response to the
+[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) whenever a response to the
 command is successfully parsed.
 
 #### EMCB_UDP_MESSAGE_CODE_SET_BARGRAPH_LED_TO_USER_DEFINED
@@ -1132,8 +1390,12 @@ command is successfully parsed.
 The integer message code for the SET_BARGRAPH_LED_TO_USER_DEFINED command.  This
 constant will also be emitted by the
 [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) whenever a response to the
+[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) whenever a response to the
 command is successfully parsed.
+
+#### EMCB_UDP_MESSAGE_CODE_SET_EVSE_CONFIG_SETTINGS
+
+The integer message code for the EMCB_UDP_MESSAGE_CODE_SET_EVSE_CONFIG_SETTINGS command. Event emitting is not yet supported.
 
 #### EMCB_UDP_MESSAGE_CODES
 

@@ -8,6 +8,22 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.12.0] - 2023-11-30
+
+### Added
+
+- Support for the following EV-SB commands: `getEvseDeviceState`, `getEvseAppliedControlSettings`, `getEvseConfigSettingsAndMode`, and `patchEvseConfigSettingsAndMode`
+- Example files for each SB and EV-SB command using unicast
+
+### Changed
+
+- Updated the message queuing system to allow every command to have it's own timeout instead of a single, static timeout for each batch of messages
+- Updated several dependencies and removed unused ones
+
+### Removed
+
+- Support for `getDeviceDebugData` and `setCloudLogging` (these were removed from the device in EM firmware release v1.16.0)
+
 ## [0.11.1] - 2021-04-07
 
 ### Fixed
@@ -97,6 +113,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Initial Public (Alpha) Release!
 
+[0.12.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.12.0
 [0.11.1]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.11.1
 [0.11.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.11.0
 [0.10.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.10.0

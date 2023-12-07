@@ -1,3 +1,5 @@
+// NOTE: This script will only work with Smart Breakers
+
 const {
     discoverDevicesErrorLogger,
     exitProcess,
