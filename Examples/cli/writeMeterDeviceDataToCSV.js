@@ -1,10 +1,4 @@
-// NOTE: This script will only work with Smart Breakers
-
-const {
-    discoverDevicesErrorLogger,
-    exitProcess,
-    logExceptionAndExitProcess
-} = require('./lib/shared')
+// NOTE: This script works with both SB and EV-SB devices
 
 const {
 
@@ -24,7 +18,6 @@ const {
 
     // Enums / Parsed Data Constants
     EMCB_UDP_ACK,
-    EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE,
 
     // Errors
     EMCB_UDP_ERROR_TIMEOUT,
@@ -36,7 +29,7 @@ const {
     EMCB_UDP_EVENT_DEVICE_REMOVED,
     EMCB_UDP_EVENT_DEVICE_IP_ADDRESS_CHANGED
 
-} = require('./../../'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-master` module, replace with `require("emcb-udp-master")`
+} = require('../../index.js'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-master` module, replace with `require("emcb-udp-master")`
 
 const UDPKeys                = require("../_config.js")
 
@@ -154,13 +147,28 @@ EMCBs.on(EMCB_UDP_ERROR_PARSER, data => {
 EMCBs.on(EMCB_UDP_EVENT_QUEUE_DRAINED, () => {
     totalQueueDrains++
 
-    EMCBs.getDeviceStatus()
+    EMCBs.getMeterData()
             .then(data => {
                 for(var ipAddress in data.responses){
+
+                    // reformat data to match getDeviceStatus
+                    // TODO: update fields for Json2csvTransform to match getMeterData instead of reformating the data here
+                    var x = {}
+
+                    for(var k in data.responses[ipAddress]){
+                        if (k != "device"){
+                            x[k] = data.responses[ipAddress][k];
+                        }
+                    }
+
+                    data.responses[ipAddress]["meter"] = x;
+
+
                     data.responses[ipAddress].ts = new Date()
                     for(var k in data.responses[ipAddress].meter){
                         data.responses[ipAddress].meter[k] = data.responses[ipAddress].meter[k].toString()
                     }
+                    
 
                     jsonWriteStreams[ipAddress].input.push(data.responses[ipAddress])
                     successes++
@@ -170,22 +178,18 @@ EMCBs.on(EMCB_UDP_EVENT_QUEUE_DRAINED, () => {
 
 })
 
-function runExample(){
+function discoverDevices(){
+
     EMCBs.discoverDevices()
         .then((devices) => {
             console.log("DISCOVER DEVICES COMPLETE - found " + Object.keys(devices).length + " EMCBs")
 
             var coloredDeviceArray = []
-            const fields = ["ts", "breaker.state", "breaker.stateString", "meter.updateNum", "meter.frequency", "meter.period", "meter.mJp0", "meter.mVARsp0", "meter.mVAsp0", "meter.LNmVp0", "meter.mAp0", "meter.q1mJp0", "meter.q2mJp0", "meter.q3mJp0", "meter.q4mJp0", "meter.q1mVARsp0", "meter.q2mVARsp0", "meter.q3mVARsp0", "meter.q4mVARsp0", "meter.q1mVAsp0", "meter.q2mVAsp0", "meter.q3mVAsp0", "meter.q4mVAsp0", "meter.mJp1", "meter.mVARsp1", "meter.mVAsp1", "meter.LNmVp1", "meter.mAp1", "meter.q1mJp1", "meter.q2mJp1", "meter.q3mJp1", "meter.q4mJp1", "meter.q1mVARsp1", "meter.q2mVARsp1", "meter.q3mVARsp1", "meter.q4mVARsp1", "meter.q1mVAsp1", "meter.q2mVAsp1", "meter.q3mVAsp1", "meter.q4mVAsp1", "meter.LLp01mV",];
+            const fields = ["ts", "meter.updateNum", "meter.frequency", "meter.period", "meter.mJp0", "meter.mVARsp0", "meter.mVAsp0", "meter.LNmVp0", "meter.mAp0", "meter.q1mJp0", "meter.q2mJp0", "meter.q3mJp0", "meter.q4mJp0", "meter.q1mVARsp0", "meter.q2mVARsp0", "meter.q3mVARsp0", "meter.q4mVARsp0", "meter.q1mVAsp0", "meter.q2mVAsp0", "meter.q3mVAsp0", "meter.q4mVAsp0", "meter.mJp1", "meter.mVARsp1", "meter.mVAsp1", "meter.LNmVp1", "meter.mAp1", "meter.q1mJp1", "meter.q2mJp1", "meter.q3mJp1", "meter.q4mJp1", "meter.q1mVARsp1", "meter.q2mVARsp1", "meter.q3mVARsp1", "meter.q4mVARsp1", "meter.q1mVAsp1", "meter.q2mVAsp1", "meter.q3mVAsp1", "meter.q4mVAsp1", "meter.LLp01mV",];
             const transformOpts = { objectMode: true, highWaterMark: 16384, encoding: 'utf-8' };
 
             for(var ipAddress in devices){
                 coloredDeviceArray.push(chalk[devices[ipAddress].chalkColor](devices[ipAddress].idDevice));
-
-                // Turn the bargraph to the same color as what we are logging for 10 seconds!
-                var device = EMCBs.devices[ipAddress]
-                device.setBargraphLEDToUserDefinedColorName(device.chalkColor, 10, true)
-
 
                 // Create a readable stream in object modefor the JSON Transformer to consume
                 const csvInput = new Readable({ objectMode: true });
@@ -200,24 +204,17 @@ function runExample(){
             }
 
             console.log(coloredDeviceArray.join(chalk.reset(",")))
-
-            setInterval(() => {
-                console.log("Toggling Devices!")
-                EMCBs.setBreakerState(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE)
-                    .catch(err => {
-                        logger.error("Unable to Toggle all breakers...")
-                        logger.error(`Successes = [${Object.keys(err.responses || {}).join(",")}]; Timeouts = [${Object.keys(err.timeouts || {}).join(",")}]; Errors = [${Object.keys(err.errors || {}).join(",")}]`)
-                    })
-            }, 10050)    // The EMCB has a 10 second lockout timer between breaker control commands.  This ensures allows us to toggle at the max possible rate
         })
         .catch(err => {
-            discoverDevicesErrorLogger(err);
+            console.error(err instanceof Error ? err.message : err)
             logger.info("Retrying Device Discovery in 5 seconds")
             setTimeout(() => {
-                runExample()
+                discoverDevices()
             }, 5000)
         })
 }
+
+discoverDevices()
 
 process.on('SIGINT', function() {   //Ctrl + C
     try{
@@ -240,19 +237,18 @@ process.on('SIGINT', function() {   //Ctrl + C
             jsonWriteStreams[ipAddress].processor.end(() => {
                 ends++
 
-                if(ends === Object.keys(jsonWriteStreams).length) {
-                    exitProcess();
-                }
+                if(ends === Object.keys(jsonWriteStreams).length)
+                    process.exit();
             })
         }
 
-        if(Object.keys(jsonWriteStreams).length === 0) {
-            exitProcess();
-        }
+        if(Object.keys(jsonWriteStreams).length === 0)
+            process.exit();
 
     } catch(ex){
-        logExceptionAndExitProcess();
+        console.error("process.on SIGINT threw an error...")
+        console.error(ex);
+        process.exit();
     }
-});
 
-runExample();
+});
