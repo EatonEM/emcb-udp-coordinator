@@ -9,7 +9,7 @@ const {
 } = require('./lib/shared')
 
 const {
-    EmcbUDPbroadcastMaster,
+    EmcbUDPbroadcastCoordinator,
     logger,
 
     EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN,
@@ -61,7 +61,7 @@ var profilingStatistics = {
     "numSuccess": 0,
     "numFailed": 0
   };
-  
+
   var profilingConfig = {
     "active": false,
     "commandKey": null,
@@ -72,7 +72,7 @@ var profilingStatistics = {
 
 var startTimeMicroseconds = 0;
 
-var EMCBs = new EmcbUDPbroadcastMaster({
+var EMCBs = new EmcbUDPbroadcastCoordinator({
 	// broadcastIPAddress : "10.130.116.255",
     broadcastUDPKey : UDPKeys.broadcast,
     unicastUDPKeys  : UDPKeys.unicast
@@ -224,7 +224,7 @@ function runExample(){
                 console.log(`Press "r" to cycle the bargraph LEDs on all breakers through the ${chalk.red("r")}${chalk.keyword("orange")("a")}${chalk.yellow("i")}${chalk.green("n")}${chalk.blue("b")}${chalk.keyword("violet")("o")}${chalk.keyword("indigo")("w")}.`);
                 console.log(`Press "s" to Get Device Status (Breaker Feedback and Metering).`);
                 console.log(`Press "f" to Get Breaker Feedback Status.`);
-                console.log(`Press "m" to Get Meter Data.`);    
+                console.log(`Press "m" to Get Meter Data.`);
                 console.log(``)
                 console.log(`To identify local devices on the network used the following commands:`);
                 console.log(`Press "d" to Discover Devices and match their bargraph LEDs to the logged colors.`);
@@ -238,12 +238,12 @@ function runExample(){
                     profilingConfig.commandString = "EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN";
                     profilingConfig.targetDevice.setBreakerState(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN, 1).then(onSuccess).catch(onError);
                 }
-    
+
                 else if(key.name === 'c'){  // close
                     profilingConfig.commandString = "EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED";
                     profilingConfig.targetDevice.setBreakerState(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED, 1).then(onSuccess).catch(onError);
                 }
-    
+
                 else if(key.name === 't'){ // toggle
                     profilingConfig.commandString = "EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE";
                     profilingConfig.targetDevice.setBreakerState(EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE, 1).then(onSuccess).catch(onError);
@@ -332,7 +332,7 @@ function runExample(){
 
                 else
                 {
-                    profilingConfig.commandString = "UNDEFINED"; 
+                    profilingConfig.commandString = "UNDEFINED";
                     profilingConfig.commandKey = null;
                 }
             }
@@ -366,13 +366,13 @@ function runExample(){
                                 if(Object.keys(EMCBs.devices).length == 1){
                                     for(var ipAddress in EMCBs.devices){
                                         profilingConfig.targetDevice = EMCBs.devices[ipAddress];
-                                    }    
+                                    }
                                 }
 
                                 else if(Object.keys(EMCBs.devices).length == 0){
                                     throw new Error("No devices found when selecting an UDP test!");
                                 }
-                                
+
 
                                 else{
                                     console.log("Please select a device to test:");
@@ -404,7 +404,7 @@ function runExample(){
                                     break;
                                 case "delete":
                                     process.stdout.clearLine();
-                                    process.stdout.cursorTo(0); 
+                                    process.stdout.cursorTo(0);
                                     profilingConfig.selectionIdx = 0;
                                     break;
                                 case '1':
@@ -440,7 +440,7 @@ function runExample(){
                             if(selectionIndex <=  devicesUnderTest.length){
                                 profilingConfig.targetDevice = EMCBs.devices[devicesUnderTest[selectionIndex].ipAddress];
                             }
-                            
+
                             if(profilingConfig.targetDevice == null){
                                 profilingConfig.selectionIdx = 0;
                                 console.log("\nERROR:  Invalid selection!!\nPlease select a device to test:");
@@ -448,8 +448,8 @@ function runExample(){
                                 for(var index in devicesUnderTest.length){
                                     process.stdout.write(count + ": " + devicesUnderTest[index].idDevice + " (" + devicesUnderTest[index].ipAddress + ")\n");
                                     count++;
-                                }   
-                            }                            
+                                }
+                            }
                         }
                     }
 
@@ -466,13 +466,13 @@ function runExample(){
                         profilingStatistics.timeMax = null;
                         profilingStatistics.timeMin = null;
                         profilingConfig.active = true;
-                        setTimeout(() => { onTest(); }, 1000);    
+                        setTimeout(() => { onTest(); }, 1000);
                     }
                 }
             });
 
             printDirections();
-        })  
+        })
         .catch(err => {
             discoverDevicesErrorLogger(err);
             logger.info("Retrying Device Discovery in 5 seconds")

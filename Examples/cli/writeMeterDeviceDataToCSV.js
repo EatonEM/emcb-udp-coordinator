@@ -2,7 +2,7 @@
 
 const {
 
-    EmcbUDPbroadcastMaster,
+    EmcbUDPbroadcastCoordinator,
     logger,
 
     // GET Message Codes
@@ -46,7 +46,7 @@ var totalQueueDrains = 0
 var successes = 0
 var failures = 0
 
-var EMCBs = new EmcbUDPbroadcastMaster({
+var EMCBs = new EmcbUDPbroadcastCoordinator({
     broadcastUDPKey : UDPKeys.broadcast,
     unicastUDPKeys  : UDPKeys.unicast
 })
@@ -120,7 +120,7 @@ EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, data => {
     logger.info(chalk[data.device.chalkColor](`Discovered EMCB ${data.device.idDevice} at ${data.device.ipAddress}!`))
 })
 
-// Called after 100 consecutive timeouts and multiple resync attempts with a particular device as we remove it from the list of devices currently "discovered" and available within the EmcbUDPbroadcastMaster
+// Called after 100 consecutive timeouts and multiple resync attempts with a particular device as we remove it from the list of devices currently "discovered" and available within the EmcbUDPbroadcastCoordinator
 EMCBs.on(EMCB_UDP_EVENT_DEVICE_REMOVED, data => {
     logger.warn(chalk[data.device.chalkColor](`Removing EMCB at ${data.device.ipAddress} with with Device ID ${data.device.idDevice}...  Too many consecutive timeouts/errors.`))
 })
@@ -168,7 +168,7 @@ EMCBs.on(EMCB_UDP_EVENT_QUEUE_DRAINED, () => {
                     for(var k in data.responses[ipAddress].meter){
                         data.responses[ipAddress].meter[k] = data.responses[ipAddress].meter[k].toString()
                     }
-                    
+
 
                     jsonWriteStreams[ipAddress].input.push(data.responses[ipAddress])
                     successes++

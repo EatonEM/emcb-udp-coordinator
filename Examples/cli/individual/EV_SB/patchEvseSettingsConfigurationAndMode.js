@@ -1,7 +1,7 @@
 // NOTE: This command will only work on EV Smart Breaker Charger
 
 const {
-    EmcbUDPbroadcastMaster,
+    EmcbUDPbroadcastCoordinator,
     EMCB_UDP_EVENT_DEVICE_DISCOVERED
 } = require('../../../..'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-master` module, replace with `require("emcb-udp-master")`
 
@@ -9,7 +9,7 @@ const UDPKeys = require("../../../_config.js")
 
 var parsers = require('./evseExampleParsers.js');
 
-var EMCBs = new EmcbUDPbroadcastMaster({
+var EMCBs = new EmcbUDPbroadcastCoordinator({
     broadcastUDPKey : UDPKeys.broadcast,
     unicastUDPKeys  : UDPKeys.unicast
 })
@@ -35,7 +35,7 @@ EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, (data) => {
         // mode: "charge-windows",
         // mode: "api-override-enable",
         // mode: "api-override-disable",
-        
+
         offlineMode : "no-change",
         // offlineMode : "no-restrictions",
 

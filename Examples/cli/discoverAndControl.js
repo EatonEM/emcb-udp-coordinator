@@ -7,7 +7,7 @@ const {
 } = require('./lib/shared')
 
 const {
-    EmcbUDPbroadcastMaster,
+    EmcbUDPbroadcastCoordinator,
     logger,
 
     EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN,
@@ -41,7 +41,7 @@ switch(command){
 }
 
 
-var EMCBs = new EmcbUDPbroadcastMaster({
+var EMCBs = new EmcbUDPbroadcastCoordinator({
     broadcastUDPKey : UDPKeys.broadcast,
     unicastUDPKeys  : UDPKeys.unicast
 })

@@ -9,7 +9,7 @@ const {
 } = require('./lib/shared')
 
 const {
-    EmcbUDPbroadcastMaster,
+    EmcbUDPbroadcastCoordinator,
     logger,
 
     EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN,
@@ -51,7 +51,7 @@ var identifyIdx = 0;
 
 
 
-var EMCBs = new EmcbUDPbroadcastMaster({
+var EMCBs = new EmcbUDPbroadcastCoordinator({
 	// broadcastIPAddress : "10.130.116.255",
     broadcastUDPKey : UDPKeys.broadcast,
     unicastUDPKeys  : UDPKeys.unicast

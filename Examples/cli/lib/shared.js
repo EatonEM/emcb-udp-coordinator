@@ -48,5 +48,5 @@ function logExceptionAndExitProcess(err) {
 module.exports = {
     "discoverDevicesErrorLogger": discoverDevicesErrorLogger,
     "exitProcess": exitProcess,
-    "logExceptionAndExitProcess": logExceptionAndExitProcess 
+    "logExceptionAndExitProcess": logExceptionAndExitProcess
 }

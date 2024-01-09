@@ -50,7 +50,7 @@ Master/Slave terminology, but will be updated to use Coordinator/Node terminolog
 throughout in a later release.
 
 **NOTE:** The implementation utilizes `Emcb` and `EMCB` as a prefix for several
-entities and constants, such as `EmcbUDPbroadcastMaster` and
+entities and constants, such as `EmcbUDPbroadcastCoordinator` and
 `EMCB_UDP_MESSAGE_CODE_GET_DEVICE_STATUS`, and this will be updated to use more
 generic `EmNode` and `EM_LCP` terminology throughout in a later release.
 

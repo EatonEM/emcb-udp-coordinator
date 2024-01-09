@@ -7,14 +7,14 @@ const {
 } = require('./lib/shared')
 
 const {
-    EmcbUDPbroadcastMaster,
+    EmcbUDPbroadcastCoordinator,
     logger,
 } = require('./../../'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-master` module, replace with `require("emcb-udp-master")`
 
 const UDPKeys                = require("../_config.js")
 const chalk                  = require('chalk');
 
-var EMCBs = new EmcbUDPbroadcastMaster({
+var EMCBs = new EmcbUDPbroadcastCoordinator({
     broadcastUDPKey : UDPKeys.broadcast,
     unicastUDPKeys  : UDPKeys.unicast
 })
@@ -53,7 +53,7 @@ async function runExample() {
         } catch (ex) {
             logExceptionAndExitProcess(ex);
         }
-        
+
     }, discoverDevicesErrorLogger);
 }
 
