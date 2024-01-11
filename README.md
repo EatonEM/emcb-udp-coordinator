@@ -45,10 +45,6 @@ Terminology:
   communicate with EM Nodes on the local network (this Node.JS SDK serves as an
   EM Coodinator)
 
-**NOTE:** Some documentation and much of the implementation in this SDK utilize
-Coordinator/Node terminology, but will be updated to use Coordinator/Node terminology
-throughout in a later release.
-
 **NOTE:** The implementation utilizes `Emcb` and `EMCB` as a prefix for several
 entities and constants, such as `EmcbUDPbroadcastCoordinator` and
 `EMCB_UDP_MESSAGE_CODE_GET_DEVICE_STATUS`, and this will be updated to use more
