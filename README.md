@@ -158,12 +158,3 @@ following command, simply reopen your terminal
 # Update NPM
 $ npm install npm -g
 ```
-
-<!-- links -->
-
-[dependency-status-svg]: https://david-dm.org/EatonEM/emcb-udp-coordinator.svg
-[dependency-status-link]: https://david-dm.org/EatonEM/emcb-udp-coordinator
-[dev-dependency-status-svg]: https://david-dm.org/EatonEM/emcb-udp-coordinator/dev-status.svg
-[dev-dependency-status-link]: https://david-dm.org/EatonEM/emcb-udp-coordinator#info=devDependencies
-[npm-version-svg]: https://badge.fury.io/js/emcb-udp-coordinator.svg
-[npm-version-link]: https://badge.fury.io/js/emcb-udp-coordinator
