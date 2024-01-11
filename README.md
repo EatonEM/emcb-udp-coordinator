@@ -46,7 +46,7 @@ Terminology:
   EM Coodinator)
 
 **NOTE:** Some documentation and much of the implementation in this SDK utilize
-Master/Slave terminology, but will be updated to use Coordinator/Node terminology
+Coordinator/Node terminology, but will be updated to use Coordinator/Node terminology
 throughout in a later release.
 
 **NOTE:** The implementation utilizes `Emcb` and `EMCB` as a prefix for several
@@ -58,13 +58,13 @@ generic `EmNode` and `EM_LCP` terminology throughout in a later release.
 
 ### npm
 
-`npm install --save emcb-udp-master`
+`npm install --save emcb-udp-coordinator`
 
 ### Manual
 
 ```sh
-git clone https://github.com/EatonEM/emcb-udp-master
-cd emcb-udp-master
+git clone https://github.com/EatonEM/emcb-udp-coordinator
+cd emcb-udp-coordinator
 npm install
 ```
 
@@ -76,7 +76,7 @@ This SDK exposes a pre-configured
 all logs are captured by [winston](https://github.com/winstonjs/winston).
 
 These logs are written to both the console and to `./logs/` whenever the
-`emcb-udp-master` is used to aid in debugging/understanding. See
+`emcb-udp-coordinator` is used to aid in debugging/understanding. See
 [docs/api.md](./docs/api.md#logger) for more information.
 
 ## Requirements
@@ -161,9 +161,9 @@ $ npm install npm -g
 
 <!-- links -->
 
-[dependency-status-svg]: https://david-dm.org/EatonEM/emcb-udp-master.svg
-[dependency-status-link]: https://david-dm.org/EatonEM/emcb-udp-master
-[dev-dependency-status-svg]: https://david-dm.org/EatonEM/emcb-udp-master/dev-status.svg
-[dev-dependency-status-link]: https://david-dm.org/EatonEM/emcb-udp-master#info=devDependencies
-[npm-version-svg]: https://badge.fury.io/js/emcb-udp-master.svg
-[npm-version-link]: https://badge.fury.io/js/emcb-udp-master
+[dependency-status-svg]: https://david-dm.org/EatonEM/emcb-udp-coordinator.svg
+[dependency-status-link]: https://david-dm.org/EatonEM/emcb-udp-coordinator
+[dev-dependency-status-svg]: https://david-dm.org/EatonEM/emcb-udp-coordinator/dev-status.svg
+[dev-dependency-status-link]: https://david-dm.org/EatonEM/emcb-udp-coordinator#info=devDependencies
+[npm-version-svg]: https://badge.fury.io/js/emcb-udp-coordinator.svg
+[npm-version-link]: https://badge.fury.io/js/emcb-udp-coordinator

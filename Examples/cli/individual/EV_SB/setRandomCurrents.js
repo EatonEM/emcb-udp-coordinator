@@ -3,7 +3,7 @@
 const {
     EmcbUDPbroadcastCoordinator,
     EMCB_UDP_EVENT_DEVICE_DISCOVERED
-} = require('../../../../index.js'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-master` module, replace with `require("emcb-udp-master")`
+} = require('../../../../index.js'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-coordinator` module, replace with `require("emcb-udp-coordinator")`
 
 const UDPKeys = require("../../../_config.js")
 
