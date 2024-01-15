@@ -1,7 +1,5 @@
 # Energy Management Local Communications Protocol Node.JS SDK
 
-[![Dependency Status][dependency-status-svg]][dependency-status-link]
-[![devDependency Status][dev-dependency-status-svg]][dev-dependency-status-link]
 [![npm version][npm-version-svg]][npm-version-link]
 
 This node module allows you to experiment with the Energy Management Local
@@ -154,3 +152,8 @@ following command, simply reopen your terminal
 # Update NPM
 $ npm install npm -g
 ```
+
+<!-- links -->
+
+[npm-version-svg]: https://badge.fury.io/js/emcb-udp-coordinator.svg
+[npm-version-link]: https://badge.fury.io/js/emcb-udp-coordinator
