@@ -1,6 +1,6 @@
 {
   "name": "emcb-udp-coordinator",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Module to discover, communicate, and and manage EM Nodes using the EM Local Communications Protocol (EMLCP) with both broadcast and unicast traffic.",
   "keywords": [
     "EMCB",
@@ -13,7 +13,8 @@
     "API",
     "EMLCP",
     "Coordinator",
-    "Nodes"
+    "Nodes",
+    "Smart"
   ],
   "main": "index.js",
   "files": [
