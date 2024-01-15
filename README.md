@@ -80,8 +80,8 @@ You will need the following installed in your environment:
 - Node.js and npm (Node Package Manager)
 - git
 
-> This library has been developed and tested on macOS using node v10.14.3.
-> **v10 or greater of Node.js is required.**
+> This library was last updated on macOS using node v20.9.0. (It was originally developed and tested on macOS using node v10.14.3)
+> **v16 or greater of Node.js is required.**
 
 ### Git
 
@@ -98,21 +98,21 @@ for download.
 #### Node installation on macOS
 
 For macOS, the preferred installation method is to use [nvm (Node Version
-Manager)](https://github.com/creationix/nvm).  You can install nvm and the
+Manager)](https://github.com/nvm-sh/nvm).  You can install nvm and the
 latest version of node using these commands:
 
 ```sh
 # Download and install nvm
-$ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+$ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
 # Install node.
-$ nvm install v10
+$ nvm install v20
 
 # set the default `node` on your $PATH in your current terminal session to the version you just installed
-$ nvm use v10
+$ nvm use v20
 
 # set the default "node" on your $PATH for all future terminal sessions
-$ nvm alias v10 default
+$ nvm alias v20 default
 ```
 
 #### Node installation on Ubuntu
@@ -139,10 +139,10 @@ command and get your version output
 
 ```sh
 $ node --version
-# v10.14.3
+# v20.9.0
 
 $ npm --version
-# 6.1.0
+# 10.2.4
 ```
 
 If you need to update `npm`, you can make it using `npm`! After running the
