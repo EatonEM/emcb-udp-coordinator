@@ -120,6 +120,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Initial Public (Alpha) Release!
 
+[1.0.0]: https://github.com/EatonEM/emcb-udp-coordinator/releases/tag/v1.0.0
 [0.12.0]: https://github.com/EatonEM/emcb-udp-coordinator/releases/tag/v0.12.0
 [0.11.1]: https://github.com/EatonEM/emcb-udp-coordinator/releases/tag/v0.11.1
 [0.11.0]: https://github.com/EatonEM/emcb-udp-coordinator/releases/tag/v0.11.0
