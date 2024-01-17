@@ -20,15 +20,14 @@ contributions to enhance the state of the SDK are encouraged!
 
 Relevant Documentation can be found at:
 
-- [Node.JS SDK API](docs/api.md): Complete API documentation for this SDK
-- [Understanding EM Local
-  Communications](https://api.em.eaton.com/docs#section/EM-API-Overview/Understanding-Local-Communications):
+- [Node.JS SDK API](docs/API.md): Complete API documentation for this SDK
+- [Understanding EM Local Communications](https://portal.em.eaton.com/advancedTopics/localCommunication):
   Documentation that descrbies, at a high level, local communications with EM
   Nodes.
 - [EM Local Communications Protocol](https://api.em.eaton.com/docs/emlcp.html):
   Complete API documentation for the EMLCP used on the local
   network that this SDK is implemented against.
-- [EM Partner API](https://api.em.eaton.com/docs): Complete REST API
+- [EM API](https://api.em.eaton.com/docs): Complete REST API
   documentation.
 - [Examples/README.md](Examples/README.md): Contains documentation on the
   provided examples and the necessary steps to begin leveraging them.
