@@ -19,6 +19,16 @@ var deviceID = argv._[0];
 var deviceIP = argv._[1];
 var color = argv._[2];
 
+if (deviceID === undefined){
+    throw "device ID (arg 0) is required";
+}
+if (deviceIP === undefined){
+    throw "device IP (arg 1) is required";
+}
+if (color === undefined){
+    throw "color (arg 2) is required";
+}
+
 var device = EMCBs.createDevice(deviceID, deviceIP, true);
 
 EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, (data) => {

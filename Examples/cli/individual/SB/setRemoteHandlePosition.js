@@ -18,6 +18,13 @@ var deviceID = argv._[0];
 var deviceIP = argv._[1];
 var command = argv._[2];
 
+if (deviceID === undefined){
+    throw "device ID (arg 0) is required";
+}
+if (deviceIP === undefined){
+    throw "device IP (arg 1) is required";
+}
+
 const validCommands = ["open", "close", "toggle"];
 if(!validCommands.includes(command)){
     console.warn("Provided command argument not in [" + validCommands.join(", ") + "].  Toggling instead")

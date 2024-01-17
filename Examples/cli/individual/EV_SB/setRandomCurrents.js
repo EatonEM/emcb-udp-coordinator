@@ -18,6 +18,13 @@ const argv = require('minimist')(process.argv.slice(2));
 var deviceID = argv._[0];
 var deviceIP = argv._[1];
 
+if (deviceID === undefined){
+    throw "device ID (arg 0) is required";
+}
+if (deviceIP === undefined){
+    throw "device IP (arg 1) is required";
+}
+
 console.log("Establishing connection to device " + deviceID + " at ip: " + deviceIP);
 var device = EMCBs.createDevice(deviceID, deviceIP, true);
 
