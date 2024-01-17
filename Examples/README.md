@@ -12,7 +12,7 @@ required UDP Keys for interacting with the devices.  Create a
 [EM Partner API](https://api.em.eaton.com/docs#section/EM-API-Overview/Understanding-Local-Communications).
 
 ```javascript
-// NOTE: All of our UDP Keys, stored as base64-encoded strings. These will be converted to Buffers before use in our application. 
+// NOTE: All of our UDP Keys, stored as base64-encoded strings. These will be converted to Buffers before use in our application.
 var keyEncoding = "base64";
 var UDPKeys = {
     "broadcast": "3UJT2HJaAqDB+jQX2Alob+OXzIFI7/UyjOQ2ZEhJoiU=",
@@ -22,7 +22,7 @@ var UDPKeys = {
     }
 }
 
-// Alternatively, use keys as 32 character hex strings.  
+// Alternatively, use keys as 32 character hex strings.
 // var keyEncoding = "hex";
 // var UDPKeys = {
 //     "broadcast": "DD4253D8725A02A0C1FA3417D809686FE397CC8148EFF5328CE436644849A225",
@@ -93,7 +93,7 @@ node ./Examples/cli/discoverAndControl.js close
 #      { ack: 0,
 #        state: 0,
 #        stateString: 'Open',
-#        device: [EmcbUDPdeviceMaster] } } }
+#        device: [EmcbUDPdeviceCoordinator] } } }
 ```
 
 ### discoverAndInteractiveControl.js

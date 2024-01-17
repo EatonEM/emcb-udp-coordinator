@@ -1,7 +1,5 @@
 # Energy Management Local Communications Protocol Node.JS SDK
 
-[![Dependency Status][dependency-status-svg]][dependency-status-link]
-[![devDependency Status][dev-dependency-status-svg]][dev-dependency-status-link]
 [![npm version][npm-version-svg]][npm-version-link]
 
 This node module allows you to experiment with the Energy Management Local
@@ -45,12 +43,8 @@ Terminology:
   communicate with EM Nodes on the local network (this Node.JS SDK serves as an
   EM Coodinator)
 
-**NOTE:** Some documentation and much of the implementation in this SDK utilize
-Master/Slave terminology, but will be updated to use Coordinator/Node terminology
-throughout in a later release.
-
 **NOTE:** The implementation utilizes `Emcb` and `EMCB` as a prefix for several
-entities and constants, such as `EmcbUDPbroadcastMaster` and
+entities and constants, such as `EmcbUDPbroadcastCoordinator` and
 `EMCB_UDP_MESSAGE_CODE_GET_DEVICE_STATUS`, and this will be updated to use more
 generic `EmNode` and `EM_LCP` terminology throughout in a later release.
 
@@ -58,13 +52,13 @@ generic `EmNode` and `EM_LCP` terminology throughout in a later release.
 
 ### npm
 
-`npm install --save emcb-udp-master`
+`npm install --save emcb-udp-coordinator`
 
 ### Manual
 
 ```sh
-git clone https://github.com/EatonEM/emcb-udp-master
-cd emcb-udp-master
+git clone https://github.com/EatonEM/emcb-udp-coordinator
+cd emcb-udp-coordinator
 npm install
 ```
 
@@ -76,7 +70,7 @@ This SDK exposes a pre-configured
 all logs are captured by [winston](https://github.com/winstonjs/winston).
 
 These logs are written to both the console and to `./logs/` whenever the
-`emcb-udp-master` is used to aid in debugging/understanding. See
+`emcb-udp-coordinator` is used to aid in debugging/understanding. See
 [docs/api.md](./docs/api.md#logger) for more information.
 
 ## Requirements
@@ -86,8 +80,8 @@ You will need the following installed in your environment:
 - Node.js and npm (Node Package Manager)
 - git
 
-> This library has been developed and tested on macOS using node v10.14.3.
-> **v10 or greater of Node.js is required.**
+> This library was last updated on macOS using node v20.9.0. (It was originally developed and tested on macOS using node v10.14.3)
+> **v16 or greater of Node.js is required.**
 
 ### Git
 
@@ -104,21 +98,21 @@ for download.
 #### Node installation on macOS
 
 For macOS, the preferred installation method is to use [nvm (Node Version
-Manager)](https://github.com/creationix/nvm).  You can install nvm and the
+Manager)](https://github.com/nvm-sh/nvm).  You can install nvm and the
 latest version of node using these commands:
 
 ```sh
 # Download and install nvm
-$ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.34.0/install.sh | bash
+$ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
 # Install node.
-$ nvm install v10
+$ nvm install v20
 
 # set the default `node` on your $PATH in your current terminal session to the version you just installed
-$ nvm use v10
+$ nvm use v20
 
 # set the default "node" on your $PATH for all future terminal sessions
-$ nvm alias v10 default
+$ nvm alias v20 default
 ```
 
 #### Node installation on Ubuntu
@@ -145,10 +139,10 @@ command and get your version output
 
 ```sh
 $ node --version
-# v10.14.3
+# v20.9.0
 
 $ npm --version
-# 6.1.0
+# 10.2.4
 ```
 
 If you need to update `npm`, you can make it using `npm`! After running the
@@ -161,9 +155,5 @@ $ npm install npm -g
 
 <!-- links -->
 
-[dependency-status-svg]: https://david-dm.org/EatonEM/emcb-udp-master.svg
-[dependency-status-link]: https://david-dm.org/EatonEM/emcb-udp-master
-[dev-dependency-status-svg]: https://david-dm.org/EatonEM/emcb-udp-master/dev-status.svg
-[dev-dependency-status-link]: https://david-dm.org/EatonEM/emcb-udp-master#info=devDependencies
-[npm-version-svg]: https://badge.fury.io/js/emcb-udp-master.svg
-[npm-version-link]: https://badge.fury.io/js/emcb-udp-master
+[npm-version-svg]: https://badge.fury.io/js/emcb-udp-coordinator.svg
+[npm-version-link]: https://badge.fury.io/js/emcb-udp-coordinator

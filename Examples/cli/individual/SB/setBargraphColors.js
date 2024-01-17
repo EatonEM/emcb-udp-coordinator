@@ -1,15 +1,15 @@
 // NOTE: This command will only work on Smart Breaker
 
 const {
-    EmcbUDPbroadcastMaster,
+    EmcbUDPbroadcastCoordinator,
     EMCB_UDP_EVENT_DEVICE_DISCOVERED,
-} = require('../../../..'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-master` module, replace with `require("emcb-udp-master")`
+} = require('../../../..'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-coordinator` module, replace with `require("emcb-udp-coordinator")`
 
 const UDPKeys                = require("../../../_config.js")
 
 const util = require('util')
 
-var EMCBs = new EmcbUDPbroadcastMaster({
+var EMCBs = new EmcbUDPbroadcastCoordinator({
     broadcastUDPKey : UDPKeys.broadcast,
     unicastUDPKeys  : UDPKeys.unicast
 })
@@ -29,9 +29,9 @@ EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, (data) => {
         .then(data => {
             for (const [ip, response] of Object.entries(data.responses)) {
                 console.log("Response from " + ip + ":");
-                
+
                 var resp = Object.assign({}, response); // shallow clone
-                delete resp.device; 
+                delete resp.device;
                 console.log(util.inspect(resp, false, null, true));
             }
         })
@@ -43,4 +43,3 @@ EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, (data) => {
             process.exit()
         })
 })
-    

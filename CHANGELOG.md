@@ -46,9 +46,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Average Power Calculation / Logging (in Watts) to
   `Examples/cli/writeDeviceDataToCSV.js`
-- `getMasterIPAddress()`
+- `getCoordinatorIPAddress()`
 - `createDevice(idDevice, ipAddress, unicastGetNextSequenceNumber = true)`
-- Undocumented EmcbUDPbroadcastMaster functionality:
+- Undocumented EmcbUDPbroadcastCoordinator functionality:
   - `setCloudLogging` and `EMCB_UDP_MESSAGE_CODE_SET_CLOUD_LOGGING` constant
   - `setMeterMode` and `EMCB_UDP_MESSAGE_CODE_SET_METER_MODE` constant
 
@@ -78,12 +78,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - EMCB_UDP_BROADCAST_ADDRESS is no longer a constant as we are now using some
   async code to determine the broadcast address.  This value can still be
-  accessed through the `EmcbUDPbroadcastMaster.ipAddress` property (although it
+  accessed through the `EmcbUDPbroadcastCoordinator.ipAddress` property (although it
   may not be available immediately in sync code after instantiation).
 
 ### Added
 
-- `EmcbUDPbroadcastMaster` now accepts a `broadcastIPaddress` or a `ifaceName`
+- `EmcbUDPbroadcastCoordinator` now accepts a `broadcastIPaddress` or a `ifaceName`
   argument to allow specifying which network interface/broadcast address a user
   want to use.
 
@@ -113,10 +113,10 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - Initial Public (Alpha) Release!
 
-[0.12.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.12.0
-[0.11.1]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.11.1
-[0.11.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.11.0
-[0.10.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.10.0
-[0.9.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.9.0
-[0.8.1]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.8.1
-[0.8.0]: https://github.com/EatonEM/emcb-udp-master/releases/tag/v0.8.0
+[0.12.0]: https://github.com/EatonEM/emcb-udp-coordinator/releases/tag/v0.12.0
+[0.11.1]: https://github.com/EatonEM/emcb-udp-coordinator/releases/tag/v0.11.1
+[0.11.0]: https://github.com/EatonEM/emcb-udp-coordinator/releases/tag/v0.11.0
+[0.10.0]: https://github.com/EatonEM/emcb-udp-coordinator/releases/tag/v0.10.0
+[0.9.0]: https://github.com/EatonEM/emcb-udp-coordinator/releases/tag/v0.9.0
+[0.8.1]: https://github.com/EatonEM/emcb-udp-coordinator/releases/tag/v0.8.1
+[0.8.0]: https://github.com/EatonEM/emcb-udp-coordinator/releases/tag/v0.8.0
