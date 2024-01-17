@@ -1,12 +1,12 @@
 # Table of Contents
 
 - [Table of Contents](#table-of-contents)
-  - [EmcbUDPbroadcastMaster](#emcbudpbroadcastmaster)
-    - [EmcbUDPbroadcastMaster Properties](#emcbudpbroadcastmaster-properties)
-    - [new EmcbUDPbroadcastMaster(args)](#new-emcbudpbroadcastmasterargs)
+  - [EmcbUDPbroadcastCoordinator](#emcbudpbroadcastcoordinator)
+    - [EmcbUDPbroadcastCoordinator Properties](#emcbudpbroadcastcoordinator-properties)
+    - [new EmcbUDPbroadcastCoordinator(args)](#new-emcbudpbroadcastcoordinatorargs)
     - [updateBroadcastUDPkey(key)](#updatebroadcastudpkeykey)
     - [updateUnicastUDPkey(idDevice, key)](#updateunicastudpkeyiddevice-key)
-    - [getMasterIPAddress()](#getmasteripaddress)
+    - [getCoordinatorIPAddress()](#getcoordinatoripaddress)
     - [getDevice(ipAddressOrIdDevice)](#getdeviceipaddressoriddevice)
     - [discoverDevices(\[nonce\])](#discoverdevicesnonce)
   - [createDevice(idDevice, ipAddress, \[unicastGetNextSequenceNumber\])\]](#createdeviceiddevice-ipaddress-unicastgetnextsequencenumber)
@@ -23,8 +23,8 @@
     - [getEvseDeviceState()](#getevsedevicestate)
     - [getEvseConfigSettingsAndMode()](#getevseconfigsettingsandmode)
     - [patchEvseConfigSettingsAndMode(options)](#patchevseconfigsettingsandmodeoptions)
-  - [EmcbUDPdeviceMaster](#emcbudpdevicemaster)
-    - [EmcbUDPdeviceMaster Properties](#emcbudpdevicemaster-properties)
+  - [EmcbUDPdeviceCoordinator](#emcbudpdevicecoordinator)
+    - [EmcbUDPdeviceCoordinator Properties](#emcbudpdevicecoordinator-properties)
   - [EventEmitter Cheat Sheet](#eventemitter-cheat-sheet)
   - [logger](#logger)
   - [Constants](#constants)
@@ -35,8 +35,8 @@
       - [EMCB\_UDP\_MESSAGE\_THROTTLE\_TIME\_MS](#emcb_udp_message_throttle_time_ms)
       - [EMCB\_UDP\_LONGEST\_IMPLEMENTED\_MESSAGE\_LENGTH](#emcb_udp_longest_implemented_message_length)
     - [EMCB UDP Application Layer Header](#emcb-udp-application-layer-header)
-      - [EMCB\_UDP\_HEADER\_START\_MASTER](#emcb_udp_header_start_master)
-      - [EMCB\_UDP\_HEADER\_START\_SLAVE](#emcb_udp_header_start_slave)
+      - [EMCB\_UDP\_HEADER\_START\_COORDINATOR](#emcb_udp_header_start_coordinator)
+      - [EMCB\_UDP\_HEADER\_START\_NODE](#emcb_udp_header_start_node)
     - [Message Codes](#message-codes)
     - [GET Message Codes](#get-message-codes)
       - [EMCB\_UDP\_MESSAGE\_CODE\_GET\_NEXT\_SEQUENCE\_NUMBER](#emcb_udp_message_code_get_next_sequence_number)
@@ -72,39 +72,39 @@
     - [Others](#others)
       - [EMCB\_UDP\_DEVICE\_COLORS](#emcb_udp_device_colors)
 
-## EmcbUDPbroadcastMaster
+## EmcbUDPbroadcastCoordinator
 
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) is the primary class exposed
-by `require('emcbUDPmaster')`.  This class manages all UDP traffic to the EMCBs.
-It facilitates device discovery, [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster)
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) is the primary class exposed
+by `require('emcbUDPcoordinator')`.  This class manages all UDP traffic to the EMCBs.
+It facilitates device discovery, [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator)
 creation and management, and holds the message queues, manages timeouts, etc.
 for both broadcast and unicast traffic.
 
 In addition to the commands listed below,
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) extends the
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) extends the
 [EventEmitter](https://nodejs.org/api/events.html) class and makes the events
 described in [EventEmitter Cheat Sheet](#eventemitter-cheat-sheet) available to
 `.on()`, `.once()`, etc.
 
 ```js
-const { EmcbUDPbroadcastMaster } = require('emcbUDPmaster');
+const { EmcbUDPbroadcastCoordinator } = require('emcbUDPcoordinator');
 // or
-const master0 = require('emcbUDPmaster').EmcbUDPbroadcastMaster
+const coordinator0 = require('emcbUDPcoordinator').EmcbUDPbroadcastCoordinator
 ```
 
-### EmcbUDPbroadcastMaster Properties
+### EmcbUDPbroadcastCoordinator Properties
 
 In addition to the functions described below, an
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) instance has the following
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) instance has the following
 properties available to access:
 
 - `ipAddress` _(String)_: The local network broadcast IP Address used by the
   instance.  This will be set asyncronously if no `broadcastIPAddress` is
   provided to the constructor
 - `port` _(Number)_: The Destination UDP port number used by the instance and
-  all [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) instances.
+  all [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) instances.
 - `devices` _(Object)_: An object indexed by individual EMCB device `IP
-  Addresses`, which holds all [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster)
+  Addresses`, which holds all [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator)
   instances for the discovered devices.
 - `udpSocket` _(dgram.Socket)_: The [Node.js udp4
   Socket](https://nodejs.org/api/dgram.html#dgram_class_dgram_socket) used for
@@ -112,12 +112,12 @@ properties available to access:
 - `unhandledMessages` _(Number)_: Integer number of times that we have received
   data from the network without an active message to process it against.   In
   other words, this is the number of times EMCBs have provided data beyond the
-  [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) instance's timeout for a
+  [`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) instance's timeout for a
   message.
 
-### new EmcbUDPbroadcastMaster(args)
+### new EmcbUDPbroadcastCoordinator(args)
 
-Creates an instance of the Broadcast Master object.
+Creates an instance of the Broadcast Coordinator object.
 
 - `args` _(Object)_
   - `broadcastUDPKey` _(Buffer)_: UDP Key for signing/validating all broadcast
@@ -127,7 +127,7 @@ Creates an instance of the Broadcast Master object.
     - _`$DEVICE_ID`_ _(Buffer)_:  UDP Key for signing/validating all unicast
       messages for the particular device ID.
   - [`broadcastIPAddress`] _(String)_: Optional broadcast IP address for the
-    master to use.
+    coordinator to use.
   - [`ifaceName`] _(String)_: Optional interface name (i.e. in the keys provided
     by
     [`os.networkInterfaces()`](https://nodejs.org/api/os.html#os_os_networkinterfaces))
@@ -143,13 +143,13 @@ Creates an instance of the Broadcast Master object.
     the legal UInt32 range of 0 <= x <= 0xFFFFFFFF.  **This value should be left
     undefined or retreived from non-volatile memory and set to the last highest
     sequence number used to maintain cybersecurity.**
-- **RETURNS** `instance` _(EmcbUDPbroadcastMaster)_: an instantiated
-  [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster).
+- **RETURNS** `instance` _(EmcbUDPbroadcastCoordinator)_: an instantiated
+  [`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator).
 
 ```js
-const { EmcbUDPbroadcastMaster } = require('./emcbUDPmaster');
+const { EmcbUDPbroadcastCoordinator } = require('./emcbUDPcoordinator');
 
-var EMCBs = new EmcbUDPbroadcastMaster({
+var EMCBs = new EmcbUDPbroadcastCoordinator({
     broadcastUDPKey : Buffer.from("DD4253D8725A02A0C1FA3417D809686FE397CC8148EFF5328CE436644849A225", "hex"),
     unicastUDPKeys  : {
         "30000c2a690c7652" : Buffer.from("01C43A38DF5669F3D410602437EC2EF3DAEB12AED3C7EB3FA192D581D2AB9F20", "hex"),
@@ -187,13 +187,13 @@ Cloud API](https://portal.developer.eatonem.com/).
 EMCBs.updateUnicastUDPkey("30000c2a690c7652", Buffer.from("DD4253D8725A02A0C1FA3417D809686FE397CC8148EFF5328CE436644849A225", "hex")
 ```
 
-### getMasterIPAddress()
+### getCoordinatorIPAddress()
 
-Get the [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster)'s `ipAddress`.
+Get the [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator)'s `ipAddress`.
 
 - **RETURNS** `Promise` _(Object)_: A `promise` that resolves with the following
   data or throws an [`Error`](https://nodejs.org/api/errors.html):
-  - `ipAddress` _(String)_: The IP Address of the Master's interface that is
+  - `ipAddress` _(String)_: The IP Address of the Coordinator's interface that is
     being used by the library.
 
 ```javascript
@@ -203,14 +203,14 @@ console.log(EMCBs.getDevice("30000c2a690c7652").idDevice)
 
 ### getDevice(ipAddressOrIdDevice)
 
-Get the [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the specified
+Get the [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the specified
 `ipAddress` or `idDevice`, assuming that it has been successfully discovered and
 is communicating with the
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster)/[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster).
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator)/[`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator).
 
 - `ipAddressOrIdDevice` _(String)_: Local IP Address or Device ID of the device
-- **RETURNS** [`instance`] _(EmcbUDPdeviceMaster | undefined)_: The
-  [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the given
+- **RETURNS** [`instance`] _(EmcbUDPdeviceCoordinator | undefined)_: The
+  [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the given
   `ipAddressOrIdDevice` or `undefined` if none was found.
 
 ```javascript
@@ -224,10 +224,10 @@ Discover EMCBs on the local network using the provisioned UDP broadcast key.
 This is a convenience wrapper that performs 4
 [getNextSequenceNumber()](#getnextsequencenumbernonce) commands and returns a
 `Promise` that will resolve with the list of all active devices within the
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) or reject with an
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) or reject with an
 [`Error`](https://nodejs.org/api/errors.html) if none have been found.
 
-> [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) will self call this
+> [`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) will self call this
 > function every 5 minutes to detect any devices that are added to the network.
 
 - [`nonce`] _(Buffer)_:  Optional 4 byte UInt32 held within a
@@ -241,8 +241,8 @@ This is a convenience wrapper that performs 4
 - **RETURNS** `Promise` _(Object)_: A `promise` that resolves with the following
   data or throws an [`Error`](https://nodejs.org/api/errors.html):
   - `data` _(Object)_:
-    - _`$IP_ADDRESS`_ _(EmcbUDPdeviceMaster)_:  The
-      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the discovered at the
+    - _`$IP_ADDRESS`_ _(EmcbUDPdeviceCoordinator)_:  The
+      [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the discovered at the
       _`$IP_ADDRESS`_ key.
 
 > **NOTE** - If there are any valid responses, the return `Promise` will
@@ -271,30 +271,30 @@ EMCBs.discoverDevices()
 
 ## createDevice(idDevice, ipAddress, [unicastGetNextSequenceNumber])]
 
-Creates an [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for a given `idDevice`
+Creates an [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for a given `idDevice`
 at a given `ipAddress` (assuming its UDP Key is provided to [new
-EmcbUDPbroadcastMaster(args)](#new-emcbudpbroadcastmasterargs)).
+EmcbUDPbroadcastCoordinator(args)](#new-emcbudpbroadcastcoordinatorargs)).
 
 - `idDevice` _(String)_:  Device ID.
 - `ipAddress` _(String)_: The local network IP Address of the device.
 - [`unicastGetNextSequenceNumber`] _(Boolean)_: Optional `true`/`false` to
   determine if the device's sequence number should be obtained via a unicast
   message.  Defaults to true.
-- **RETURNS** - `device` _(EmcbUDPdeviceMaster)_: The newly created
-  [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) instance.
+- **RETURNS** - `device` _(EmcbUDPdeviceCoordinator)_: The newly created
+  [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) instance.
 
 ### syncDeviceSequenceNumbers()
 
 Sends a unicast   -
 [setNextSequenceNumber](#setnextsequencenumberdesirednextsequencenumber) command
-to each [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) instance that the
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) has discovered in order to
+to each [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) instance that the
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) has discovered in order to
 sync their sequence numbers together.
 
 > **NOTE** - this method should **NOT** be used in most applications.
 > Specifically if you are using the
 > [EMCB_UDP_EVENT_QUEUE_DRAINED](#EMCB_UDP_EVENT_QUEUE_DRAINED) event for
-> polling (which you should be using), the `emcbUDPmaster` library will
+> polling (which you should be using), the `emcbUDPcoordinator` library will
 > automatically take care of keeping device sequence numbers in sync by
 > monitoring for consecutive timeouts from discovered devices.
 
@@ -326,8 +326,8 @@ sequence number of `0x0000` to facilitate device discovery and synchronization.
     - `responses` _(Object)_: Optional object that will contain parsed responses
       by IP Address for valid responses
       - _`$IP_ADDRESS`_ _(Object)_:
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
         - `nextSequenceNumber` _(Number)_:  UInt32 expected value of the
           Sequence Number in the next command to the device
         - `idDevice` _(String)_:  Device ID.
@@ -335,23 +335,23 @@ sequence number of `0x0000` to facilitate device discovery and synchronization.
     - `errors` _(Object)_: Optional object that will contain
       [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
       additional `device` property, which is the relevant
-      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any
       encountered errors, excluding timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An
         [`Error`](https://nodejs.org/api/errors.html) object describing the
         error.
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
     - `timeouts` _(Object)_: Optional object that will contain
       [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
       additional `device` property, which is the relevant
-      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any
       timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An
         [`Error`](https://nodejs.org/api/errors.html) object describing the
         timeout.
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
 
 > **NOTE** - If there are any valid responses, the return `Promise` will
 > resolve.  It will only reject in the event that **ALL** responses are errors
@@ -380,8 +380,8 @@ Gets the Remote Handle Position of the EMCB.
     - `responses` _(Object)_: Optional object that will contain parsed responses
       by IP Address for valid responses
       - _`$IP_ADDRESS`_ _(Object)_:
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
         - `state` _(Number)_: UInt8 code representing the breaker's current
           Feedback State.  One of
           `EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN`,
@@ -392,23 +392,23 @@ Gets the Remote Handle Position of the EMCB.
     - `errors` _(Object)_: Optional object that will contain
       [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
       additional `device` property, which is the relevant
-      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any
       encountered errors, excluding timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An
         [`Error`](https://nodejs.org/api/errors.html) object describing the
         error.
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
     - `timeouts` _(Object)_: Optional object that will contain
       [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
       additional `device` property, which is the relevant
-      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any
       timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An
         [`Error`](https://nodejs.org/api/errors.html) object describing the
         timeout.
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
 
 > **NOTE** - If there are any valid responses, the return `Promise` will
 > resolve.  It will only reject in the event that **ALL** responses are errors
@@ -445,7 +445,7 @@ Gets the Current Metering Data for the EMCB.
   - `data` _(Object)_:
     - `responses` _(Object)_: Optional object that will contain parsed responses by IP Address for valid responses
       - _`$IP_ADDRESS`_ _(Object)_:
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
         - `updateNum` _(Number)_: Integer Update number. Starts at 0 on boot and increments when periodic data is updated on the device.
         - `frequency` _(Number)_: Integer Line frequency. mHz.
         - `period` _(Number)_: Integer Period. The Number of milliseconds over which the returned data was accumulated.
@@ -484,12 +484,12 @@ Gets the Current Metering Data for the EMCB.
         - `q3mVAsp1` _(Number)_: UInt64 Quadrant 3 Phase 1 Cumulative Apparent energy. mVAs.
         - `q4mVAsp1` _(Number)_: UInt64 Quadrant 4 Phase 1 Cumulative Apparent energy. mVAs.
         - `LLp01mV` _(Number)_: Integer Phase-phase voltage RMS. mV.
-    - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any encountered errors, excluding timeouts
+    - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any encountered errors, excluding timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the error.
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
-    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any timeouts
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
+    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the timeout.
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
 
 > **NOTE** - If there are any valid responses, the return `Promise` will
 > resolve.  It will only reject in the event that **ALL** responses are errors
@@ -525,7 +525,7 @@ Gets the Current Metering Data for the EMCB.
   - `data` _(Object)_:
     - `responses` _(Object)_: Optional object that will contain parsed responses by IP Address for valid responses
       - _`$IP_ADDRESS`_ _(Object)_:
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
         - `breaker` _(Object)_:
           - `state` _(Number)_: UInt8 code representing the breaker's current Feedback State.  One of `EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN`, `EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED`, or `EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE`.
           - `stateString` _(String)_: A human readable string representing the EMCB state.  One of `"Open"`, `"Closed"`, or `"Feedback Mismatch"`.
@@ -568,12 +568,12 @@ Gets the Current Metering Data for the EMCB.
           - `q3mVAsp1` _(Number)_: UInt64 Quadrant 3 Phase 1 Cumulative Apparent energy. mVAs.
           - `q4mVAsp1` _(Number)_: UInt64 Quadrant 4 Phase 1 Cumulative Apparent energy. mVAs.
           - `LLp01mV` _(Number)_: Integer Phase-phase voltage RMS. mV.
-    - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any encountered errors, excluding timeouts
+    - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any encountered errors, excluding timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the error.
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
-    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any timeouts
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
+    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the timeout.
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
 
 > **NOTE** - If there are any valid responses, the return `Promise` will
 > resolve.  It will only reject in the event that **ALL** responses are errors
@@ -605,7 +605,7 @@ Sequence Number that the device will currently accept.
 > **NOTE** - this method should **NOT** be used in most applications.
 > Specifically if you are using the
 > [EMCB_UDP_EVENT_QUEUE_DRAINED](#EMCB_UDP_EVENT_QUEUE_DRAINED) event for
-> polling (which you should be using), the `emcbUDPmaster` library will
+> polling (which you should be using), the `emcbUDPcoordinator` library will
 > automatically take care of keeping device sequence numbers in sync by
 > monitoring for consecutive timeouts from discovered devices.
 
@@ -614,16 +614,16 @@ Sequence Number that the device will currently accept.
   - `data` _(Object)_:
     - `responses` _(Object)_: Optional object that will contain parsed responses by IP Address for valid responses
       - _`$IP_ADDRESS`_ _(Object)_:
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
         - `ack` _(Number)_: UInt8 ACK code provided by the device.  A value of [EMCB_UDP_ACK](#EMCB_UDP_ACK) means the command was executed and the breaker confirmed it is in in desired state.  Any other value is a NACK (and is likely enumerated as an **EMCB_UDP_SET_NEXT_SEQUENCE_NUMBER_\*** Enum).
         - `ackString` _(String | undefined)_: A human readable string representing `ack` value.  One of `"Acknowledged"`, `"Rate Limited"`, `"Bad Sequence Number"`, or `undefined`.
         - `nextSequenceNumber` _(Number | undefined)_:  UInt32 expected value of the Sequence Number in the next command to the device.  This value will only be set if `ack` === [EMCB_UDP_ACK](#EMCB_UDP_ACK).
-    - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any encountered errors, excluding timeouts
+    - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any encountered errors, excluding timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the error.
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
-    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any timeouts
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
+    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the timeout.
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
 
 > **NOTE** - The return `Promise` will resolve **ONLY** if all requests are
 > successful.  It will reject if **ANY** responses are errors or timeouts.
@@ -643,16 +643,16 @@ up to maxAttempts times (defaults to 3).
   - `data` _(Object)_:
     - `responses` _(Object)_: Optional object that will contain parsed responses by IP Address for valid responses
       - _`$IP_ADDRESS`_ _(Object)_:
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
         - `ack` _(Number)_: UInt8 ACK code provided by the device.  A value of [EMCB_UDP_ACK](#EMCB_UDP_ACK) means the command was executed and the breaker confirmed it is in in desired state.  Any other value is a NACK.
         - `state` _(Number)_: UInt8 code representing the breaker's current Feedback State.  One of `EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_OPEN`, `EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_CLOSED`, or `EMCB_UDP_BREAKER_REMOTE_HANDLE_POSITION_TOGGLE`.
         - `stateString` _(String)_: A human readable string representing the EMCB state.  One of `"Open"`, `"Closed"`, or `"Feedback Mismatch"`.
-    - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any encountered errors, excluding timeouts
+    - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any encountered errors, excluding timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the error.
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
-    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any timeouts
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
+    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the timeout.
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
 
 > **NOTE** - The return `Promise` will resolve **ONLY** if all requests are
 > successful.  It will reject if **ANY** responses are errors or timeouts.
@@ -750,14 +750,14 @@ under the hood.
   - `data` _(Object)_:
     - `responses` _(Object)_: Optional object that will contain parsed responses by IP Address for valid responses
       - _`$IP_ADDRESS`_ _(Object)_:
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
         - `ack` _(Number)_: UInt8 ACK code provided by the device.  A value of [EMCB_UDP_ACK](#EMCB_UDP_ACK) means the command was executed and the breaker confirmed it is in in desired state.  Any other value is a NACK.
-      - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any encountered errors, excluding timeouts
+      - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any encountered errors, excluding timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the error.
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
-    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any timeouts
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
+    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the timeout.
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
 
 > **NOTE** - The return `Promise` will resolve **ONLY** if all requests are
 > successful.  It will reject if **ANY** responses are errors or timeouts.
@@ -785,14 +785,14 @@ under the hood.
   - `data` _(Object)_:
     - `responses` _(Object)_: Optional object that will contain parsed responses by IP Address for valid responses
       - _`$IP_ADDRESS`_ _(Object)_:
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
         - `ack` _(Number)_: UInt8 ACK code provided by the device.  A value of [EMCB_UDP_ACK](#EMCB_UDP_ACK) means the command was executed and the breaker confirmed it is in in desired state.  Any other value is a NACK.
-      - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any encountered errors, excluding timeouts
+      - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any encountered errors, excluding timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the error.
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
-    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any timeouts
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
+    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the timeout.
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
 
 > **NOTE** - The return `Promise` will resolve **ONLY** if all requests are
 > successful.  It will reject if **ANY** responses are errors or timeouts.
@@ -817,8 +817,8 @@ Gets the currently applied EVSE control settings (`enabled`, `authorized`, `maxC
     - `responses` _(Object)_: Optional object that will contain parsed responses
       by IP Address for valid responses
       - _`$IP_ADDRESS`_ _(Object)_:
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
         - `enabled` _(Number)_: UInt8 code representing if charging is enabled (`0` for disabled, `1` for enabled, `255` for internal error). [More information here](https://portal.em.eaton.com/advancedTopics/evseStates#understandingEnabled)
         - `authorized` _(Number)_: UInt8 code representing if charging is authorized (`0` for disabled, `1` for enabled, `255` for internal error). [More information here](https://portal.em.eaton.com/advancedTopics/evseStates#understandingAuthorized)
         - `maxCurrentAmps` _(Number)_: The maximum current as a UInt8 the EV is allowed to consume in Amps.
@@ -828,23 +828,23 @@ Gets the currently applied EVSE control settings (`enabled`, `authorized`, `maxC
     - `errors` _(Object)_: Optional object that will contain
       [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
       additional `device` property, which is the relevant
-      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any
       encountered errors, excluding timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An
         [`Error`](https://nodejs.org/api/errors.html) object describing the
         error.
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
     - `timeouts` _(Object)_: Optional object that will contain
       [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
       additional `device` property, which is the relevant
-      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any
       timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An
         [`Error`](https://nodejs.org/api/errors.html) object describing the
         timeout.
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
 
 > **NOTE** - If there are any valid responses, the return `Promise` will
 > resolve.  It will only reject in the event that **ALL** responses are errors
@@ -877,8 +877,8 @@ Gets the EVSE device state (`state`, `permanentError`, `errorCode`, `errorData`)
     - `responses` _(Object)_: Optional object that will contain parsed responses
       by IP Address for valid responses
       - _`$IP_ADDRESS`_ _(Object)_:
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
         - `state` _(Number)_: J1772 EVSE state as a UInt8, (`0` is "A", `1` is "B1", `2` is "B2", `3` is "C", `4` is "E", `5` is "F", `255` for internal error) [See state explanations here](https://portal.em.eaton.com/advancedTopics/evseStates#understandingEvseStates)
         - `permanentError` _(Number)_: UInt8 code representing if EVSE has a permanent error (`0` for no, `1` for yes, `255` for internal error).,
         - `errorCode` _(Number)_: EVSE error code as a UInt8 [see error code list here](https://api.em.eaton.com/docs/emlcp.html#section/Smart-Breaker-Local-Communications-Protocol/Messages),
@@ -886,23 +886,23 @@ Gets the EVSE device state (`state`, `permanentError`, `errorCode`, `errorData`)
     - `errors` _(Object)_: Optional object that will contain
       [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
       additional `device` property, which is the relevant
-      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any
       encountered errors, excluding timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An
         [`Error`](https://nodejs.org/api/errors.html) object describing the
         error.
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
     - `timeouts` _(Object)_: Optional object that will contain
       [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
       additional `device` property, which is the relevant
-      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any
       timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An
         [`Error`](https://nodejs.org/api/errors.html) object describing the
         timeout.
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
 
 > **NOTE** - If there are any valid responses, the return `Promise` will
 > resolve.  It will only reject in the event that **ALL** responses are errors
@@ -935,8 +935,8 @@ Gets the EVSE configuration settings and EVSE charge mode (`mode`, `offlineMode`
     - `responses` _(Object)_: Optional object that will contain parsed responses
       by IP Address for valid responses
       - _`$IP_ADDRESS`_ _(Object)_:
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
         - `mode` _(Number)_: UInt8 code representing the charge mode (`1` : "no-restrictions", `2` : "offline-no-restrictions", `3` : "manual-override", `4` : "cloud-api", `5` : "charge-windows", `6` : "api-override-enable", `7` : "api-override-disable", `8` : "ocpp",). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#modesAndConfigurations)
         - `offlineMode` _(Number)_: UInt8 code representing the charging behavior when connection to the cloud is lost (`1` : "no-restrictions", `2` : "no-change"). [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#configurationOfflineConfiguration)
         - `apiConfiguration` _(Object)_: Object that contains the configuration settings to be used while `mode` is "cloud-api" [More information here](https://portal.em.eaton.com/advancedTopics/evseConfiguration#modeCloudApi)
@@ -948,23 +948,23 @@ Gets the EVSE configuration settings and EVSE charge mode (`mode`, `offlineMode`
     - `errors` _(Object)_: Optional object that will contain
       [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
       additional `device` property, which is the relevant
-      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any
       encountered errors, excluding timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An
         [`Error`](https://nodejs.org/api/errors.html) object describing the
         error.
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
     - `timeouts` _(Object)_: Optional object that will contain
       [`Error`](https://nodejs.org/api/errors.html) objects decorated with an
       additional `device` property, which is the relevant
-      [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any
+      [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any
       timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An
         [`Error`](https://nodejs.org/api/errors.html) object describing the
         timeout.
-        - `device` _(EmcbUDPdeviceMaster)_: The
-          [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The
+          [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
 
 > **NOTE** - If there are any valid responses, the return `Promise` will
 > resolve.  It will only reject in the event that **ALL** responses are errors
@@ -1005,14 +1005,14 @@ Sets the EVSE configuration settings and EVSE charge mode (`mode`, `offlineMode`
   - `data` _(Object)_:
     - `responses` _(Object)_: Optional object that will contain parsed responses by IP Address for valid responses
       - _`$IP_ADDRESS`_ _(Object)_:
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
         - `ack` _(Number)_: UInt8 ACK code provided by the device.  A value of [EMCB_UDP_ACK](#EMCB_UDP_ACK) means the command was executed and the breaker confirmed it is in in desired state.  Any other value is a NACK.
-      - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any encountered errors, excluding timeouts
+      - `errors` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any encountered errors, excluding timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the error.
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
-    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster), by IP Address for any timeouts
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
+    - `timeouts` _(Object)_: Optional object that will contain [`Error`](https://nodejs.org/api/errors.html) objects decorated with an additional `device` property, which is the relevant [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator), by IP Address for any timeouts
       - _`$IP_ADDRESS`_ _(Error)_:  An [`Error`](https://nodejs.org/api/errors.html) object describing the timeout.
-        - `device` _(EmcbUDPdeviceMaster)_: The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) for the response.
+        - `device` _(EmcbUDPdeviceCoordinator)_: The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) for the response.
 
 > **NOTE** - The return `Promise` will resolve **ONLY** if all requests are
 > successful.  It will reject if **ANY** responses are errors or timeouts.
@@ -1047,39 +1047,39 @@ for (var ipAddress in EMCBs.devices) {
 
 ```
 
-## EmcbUDPdeviceMaster
+## EmcbUDPdeviceCoordinator
 
-The [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) exposes the same functionality
-as the [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster), but unicasts each
+The [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) exposes the same functionality
+as the [`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator), but unicasts each
 command to a specific device/IP address rather than using the broadcast IP
 address.  In addition to the commands listed below,
-[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) also extends the
+[`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) also extends the
 [EventEmitter](https://nodejs.org/api/events.html) class and makes the events
 described in [EventEmitter Cheat Sheet](#eventemitter-cheat-sheet) available to
 `.on()`, `.once()`, etc.
 
 Instances of this class are created and managed by the
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) (rather than being created
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) (rather than being created
 directly) as a part of the [Device Discovery](#discoverdevicesnonce) process
 (and more accurately during [getNextSequenceNumber](#getnextsequencenumbernonce)
 responses).  The instances can be obtained using the
 [getDevice](#getDeviceipaddressoriddevice) function or by accessing the
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster).`devices` property directly
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator).`devices` property directly
 by the device's `IP Address`.
 
 The following commands from the
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) are **NOT** available in
-[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) instances:
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) are **NOT** available in
+[`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) instances:
 
 - [updateBroadcastUDPkey(key)](#updatebroadcastudpkeykey)
 - [updateUnicastUDPkey(key)](#updateunicastudpkeyiddevice-key)
-- [getMasterIPAddress()](#getMasterIPAddress)
+- [getCoordinatorIPAddress()](#getCoordinatorIPAddress)
 - [getDevice(ipAddressOrIdDevice)](#getDeviceipaddressoriddevice)
 - [discoverDevices(nonce)](#discoverdevicesnonce)
 - [syncDeviceSequenceNumbers](#syncdevicesequencenumbers)
 
 These commands are identical to the
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster), except that they unicast
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator), except that they unicast
 the command to the specific `idDevice` ipAddress instead of broadcasting on the
 broadcast address
 
@@ -1092,16 +1092,16 @@ broadcast address
 - [setBargraphLEDToUserDefinedColor(enabled[, colorObj, blinking])](#setbargraphledtouserdefinedcolorenabled-colorobj-blinking)
 - [setBargraphLEDToUserDefinedColorName(colorName[, duration, blinking])](#setbargraphledtouserdefinedcolornamecolorname-duration-blinking)
 
-### EmcbUDPdeviceMaster Properties
+### EmcbUDPdeviceCoordinator Properties
 
 In addition to the functions listed above, an
-[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) has 4 additional properties that
-are **NOT** available in [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster)
+[`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) has 4 additional properties that
+are **NOT** available in [`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator)
 instances:
 
 - `chalkColor` _(string)_: This is a color assigned to the device from the
   [EMCB_UDP_DEVICE_COLORS](#EMCB_UDP_DEVICE_COLORS) array during
-  [`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) instantiation.  It can be used
+  [`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) instantiation.  It can be used
   with [chalk](https://www.npmjs.com/package/chalk) to help colorize logs.
 - `idDevice` _(string)_: Device ID of the device
 - `remoteHandlePosition` _(Number)_: UInt8 code representing the breaker's
@@ -1115,8 +1115,8 @@ instances:
 
 ## EventEmitter Cheat Sheet
 
-Both [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) extend the
+Both [`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) and
+[`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) extend the
 [EventEmitter](https://nodejs.org/api/events.html) class.  The following code
 will register for every event and provides some commentary for the circumstances
 under which events get called.
@@ -1169,7 +1169,7 @@ EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, data => {
     logger.info(chalk[data.device.chalkColor](`Discovered EMCB ${data.device.idDevice} at ${data.device.ipAddress}!`))
 })
 
-// Called after 100 consecutive timeouts and multiple resync attempts with a particular device as we remove it from the list of devices currently "discovered" and available within the EmcbUDPbroadcastMaster
+// Called after 100 consecutive timeouts and multiple resync attempts with a particular device as we remove it from the list of devices currently "discovered" and available within the EmcbUDPbroadcastCoordinator
 EMCBs.on(EMCB_UDP_EVENT_DEVICE_REMOVED, data => {
     logger.warn(chalk[data.device.chalkColor](`Removing EMCB at ${data.device.ipAddress} with with Device ID ${data.device.idDevice}...  Too many consecutive timeouts/errors.`))
 })
@@ -1208,7 +1208,7 @@ EMCBs.discoverDevices()
   [winston](https://github.com/winstonjs/winston).
 
 These logs are written to both the console and to `./logs/` whenever the
-`emcbUDPmaster` is used to aid in debugging/understanding.
+`emcbUDPcoordinator` is used to aid in debugging/understanding.
 
 > **NOTE** - Because the written files will contain colorized output via ANSI
 > Escape codes, command line tools such as `cat` or
@@ -1232,8 +1232,8 @@ const {
     EMCB_UDP_LONGEST_IMPLEMENTED_MESSAGE_LENGTH,
 
     // Application Layer Header Constants
-    EMCB_UDP_HEADER_START_MASTER,
-    EMCB_UDP_HEADER_START_SLAVE,
+    EMCB_UDP_HEADER_START_COORDINATOR,
+    EMCB_UDP_HEADER_START_NODE,
 
     // Application Layer GET Message Codes
     EMCB_UDP_MESSAGE_CODE_GET_NEXT_SEQUENCE_NUMBER,
@@ -1279,7 +1279,7 @@ const {
     // Others
     EMCB_UDP_DEVICE_COLORS
 
-} = require('emcbUDPmaster');
+} = require('emcbUDPcoordinator');
 ```
 
 ### Network Configuration
@@ -1287,8 +1287,8 @@ const {
 #### EMCB_UDP_PORT
 
 The destination UDP port number that will be used by default by
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and all created
-[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) instances.  This value is 32866
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) and all created
+[`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) instances.  This value is 32866
 (or "EATON" on a phone keypad)
 
 ### EMCB UDP Application Layer
@@ -1312,13 +1312,13 @@ processing time / buffer overruns in fuzz testing).
 
 ### EMCB UDP Application Layer Header
 
-#### EMCB_UDP_HEADER_START_MASTER
+#### EMCB_UDP_HEADER_START_COORDINATOR
 
-Start Byte of all Master->Slave requests
+Start Byte of all Coordinator->Node requests
 
-#### EMCB_UDP_HEADER_START_SLAVE
+#### EMCB_UDP_HEADER_START_NODE
 
-Start Byte of all Slave->Master responses
+Start Byte of all Node->Coordinator responses
 
 ### Message Codes
 
@@ -1328,31 +1328,31 @@ Start Byte of all Slave->Master responses
 
 The integer message code for the GET_NEXT_SEQUENCE_NUMBER command.  This
 constant will also be emitted by the
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) whenever a response to the
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) and
+[`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) whenever a response to the
 command is successfully parsed.
 
 #### EMCB_UDP_MESSAGE_CODE_GET_DEVICE_STATUS
 
 The integer message code for the GET_DEVICE_STATUS command.  This constant will
-also be emitted by the [`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) whenever a response to the
+also be emitted by the [`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) and
+[`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) whenever a response to the
 command is successfully parsed.
 
 #### EMCB_UDP_MESSAGE_CODE_GET_BREAKER_REMOTE_HANDLE_POSITION
 
 The integer message code for the GET_BREAKER_REMOTE_HANDLE_POSITION command.
 This constant will also be emitted by the
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) whenever a response to the
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) and
+[`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) whenever a response to the
 command is successfully parsed.
 
 #### EMCB_UDP_MESSAGE_CODE_GET_METER_TELEMETRY_DATA
 
 The integer message code for the GET_METER_TELEMETRY_DATA command.  This
 constant will also be emitted by the
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) whenever a response to the
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) and
+[`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) whenever a response to the
 command is successfully parsed.
 
 #### EMCB_UDP_MESSAGE_CODE_GET_EVSE_APPLIED_CONTROL_SETTINGS
@@ -1373,24 +1373,24 @@ The integer message code for the EMCB_UDP_MESSAGE_CODE_GET_EVSE_CONFIG_SETTINGS 
 
 The integer message code for the SET_NEXT_SEQUENCE_NUMBER command.  This
 constant will also be emitted by the
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) whenever a response to the
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) and
+[`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) whenever a response to the
 command is successfully parsed.
 
 #### EMCB_UDP_MESSAGE_CODE_SET_BREAKER_REMOTE_HANDLE_POSITION
 
 The integer message code for the SET_BREAKER_REMOTE_HANDLE_POSITION command.
 This constant will also be emitted by the
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) whenever a response to the
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) and
+[`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) whenever a response to the
 command is successfully parsed.
 
 #### EMCB_UDP_MESSAGE_CODE_SET_BARGRAPH_LED_TO_USER_DEFINED
 
 The integer message code for the SET_BARGRAPH_LED_TO_USER_DEFINED command.  This
 constant will also be emitted by the
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) and
-[`EmcbUDPdeviceMaster`](#emcbudpdevicemaster) whenever a response to the
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) and
+[`EmcbUDPdeviceCoordinator`](#emcbudpdevicecoordinator) whenever a response to the
 command is successfully parsed.
 
 #### EMCB_UDP_MESSAGE_CODE_SET_EVSE_CONFIG_SETTINGS
@@ -1451,11 +1451,11 @@ handle should toggle from its current state
 
 In addtion to the [GET](#get-message-codes) and [SET](#set-message-codes)
 Message codes, the following events will be emitted by
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) instances:
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) instances:
 
 #### EMCB_UDP_EVENT_QUEUE_DRAINED
 
-Emitted whenever the message queue for the broadcast master is empty and the
+Emitted whenever the message queue for the broadcast coordinator is empty and the
 application should execute additional regular polling commands
 
 ```javascript
@@ -1473,7 +1473,7 @@ Emitted whenever a new EMCB is discovered as a part of a
 #### EMCB_UDP_EVENT_DEVICE_REMOVED
 
 Emitted whenever an EMCB is removed from the
-[`EmcbUDPbroadcastMaster`](#emcbudpbroadcastmaster) instance's list of devices,
+[`EmcbUDPbroadcastCoordinator`](#emcbudpbroadcastcoordinator) instance's list of devices,
 due to excessive consecutive timeouts.
 
 #### EMCB_UDP_EVENT_DEVICE_IP_ADDRESS_CHANGED

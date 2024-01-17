@@ -8,7 +8,7 @@ const {
 
 const {
 
-    EmcbUDPbroadcastMaster,
+    EmcbUDPbroadcastCoordinator,
     logger,
 
     // GET Message Codes
@@ -36,7 +36,7 @@ const {
     EMCB_UDP_EVENT_DEVICE_REMOVED,
     EMCB_UDP_EVENT_DEVICE_IP_ADDRESS_CHANGED
 
-} = require('./../../'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-master` module, replace with `require("emcb-udp-master")`
+} = require('./../../'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-coordinator` module, replace with `require("emcb-udp-coordinator")`
 
 const UDPKeys                = require("../_config.js")
 
@@ -53,7 +53,7 @@ var totalQueueDrains = 0
 var successes = 0
 var failures = 0
 
-var EMCBs = new EmcbUDPbroadcastMaster({
+var EMCBs = new EmcbUDPbroadcastCoordinator({
     broadcastUDPKey : UDPKeys.broadcast,
     unicastUDPKeys  : UDPKeys.unicast
 })
@@ -127,7 +127,7 @@ EMCBs.on(EMCB_UDP_EVENT_DEVICE_DISCOVERED, data => {
     logger.info(chalk[data.device.chalkColor](`Discovered EMCB ${data.device.idDevice} at ${data.device.ipAddress}!`))
 })
 
-// Called after 100 consecutive timeouts and multiple resync attempts with a particular device as we remove it from the list of devices currently "discovered" and available within the EmcbUDPbroadcastMaster
+// Called after 100 consecutive timeouts and multiple resync attempts with a particular device as we remove it from the list of devices currently "discovered" and available within the EmcbUDPbroadcastCoordinator
 EMCBs.on(EMCB_UDP_EVENT_DEVICE_REMOVED, data => {
     logger.warn(chalk[data.device.chalkColor](`Removing EMCB at ${data.device.ipAddress} with with Device ID ${data.device.idDevice}...  Too many consecutive timeouts/errors.`))
 })

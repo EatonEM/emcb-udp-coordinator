@@ -2,7 +2,7 @@ const util = require('util');
 
 const {
     logger,
-} = require('./../../../'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-master` module, replace with `require("emcb-udp-master")`
+} = require('./../../../'); // If running this example somewhere outside of a `git clone` of the `emcb-udp-coordinator` module, replace with `require("emcb-udp-coordinator")`
 
 function discoverDevicesErrorLogger(err) {
     if (err instanceof Error) {
@@ -48,5 +48,5 @@ function logExceptionAndExitProcess(err) {
 module.exports = {
     "discoverDevicesErrorLogger": discoverDevicesErrorLogger,
     "exitProcess": exitProcess,
-    "logExceptionAndExitProcess": logExceptionAndExitProcess 
+    "logExceptionAndExitProcess": logExceptionAndExitProcess
 }

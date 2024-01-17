@@ -1,6 +1,6 @@
 {
-  "name": "emcb-udp-master",
-  "version": "0.12.0",
+  "name": "emcb-udp-coordinator",
+  "version": "1.0.0",
   "description": "Module to discover, communicate, and and manage EM Nodes using the EM Local Communications Protocol (EMLCP) with both broadcast and unicast traffic.",
   "keywords": [
     "EMCB",
@@ -13,7 +13,9 @@
     "API",
     "EMLCP",
     "Coordinator",
-    "Nodes"
+    "Nodes",
+    "Smart",
+    "Charger"
   ],
   "main": "index.js",
   "files": [
@@ -22,7 +24,7 @@
   "dependencies": {
     "bigint-buffer": "^1.1.5",
     "chalk": "^4.1.2",
-    "color-name-list": "^10.16.0",
+    "color-name-list": "^10.0.0",
     "int64-buffer": "^1.0.1",
     "ip": "^1.1.8",
     "local-ipv4-address": "0.0.2",
@@ -40,7 +42,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/EatonEM/emcb-udp-master"
+    "url": "git://github.com/EatonEM/emcb-udp-coordinator"
   },
   "author": "EatonEM",
   "license": "BSD-3-Clause"
