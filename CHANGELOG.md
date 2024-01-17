@@ -8,6 +8,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.0] - 2024-01-17
+
+### Changed
+
+- **BREAKING** Changed project name to `EMCB UDP Coordinator` to align with Eaton policies. Updated file names: `emcbUDPbroadcastCoordinator` and `emcbUDPdeviceCoordinator`
+
 ## [0.12.0] - 2023-11-30
 
 ### Added
@@ -17,6 +23,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **BREAKING** Node.js minimum version bumped from v10 to v16
 - Updated the message queuing system to allow every command to have it's own timeout instead of a single, static timeout for each batch of messages
 - Updated several dependencies and removed unused ones
 
